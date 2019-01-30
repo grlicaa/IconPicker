@@ -17,7 +17,7 @@
   "oracle" : {
     "versions" : ["18","12.2.0.1", "12.1.0.1", "11.2.0.1"],
     "apex" : {
-      "versions" : ["18.1","18.2"],
+      "versions" : ["18.2"],
       "plugin" : {
         "internalName" : "si.abakus.iconpicker",
         "type" : "item",

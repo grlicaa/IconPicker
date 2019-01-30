@@ -37,7 +37,6 @@ https://apex.oracle.com/pls/apex/f?p=94650
 
 #### Oracle APEX Versions
 <ul>
-<li>Application Express 18.1</li>
 <li>Application Express 18.2</li>
 </ul>
 
