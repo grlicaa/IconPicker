@@ -15,9 +15,9 @@
     "url" : "https://github.com/grlicaa/IconPicker.git"
   },
   "oracle" : {
-    "versions" : ["18","12.2.0.1", "12.1.0.1", "11.2.0.1"],
+    "versions" : ["12.2.0.1", "12.1.0.1", "11.2.0.1"],
     "apex" : {
-      "versions" : ["18.2"],
+      "versions" : ["18.2.0"],
       "plugin" : {
         "internalName" : "si.abakus.iconpicker",
         "type" : "item",
