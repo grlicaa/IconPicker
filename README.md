@@ -25,12 +25,12 @@ https://apex.oracle.com/pls/apex/f?p=94650
 ### Tested On (so far):
 
 #### Browsers
-<ul> Supported
+<ul> #####Supported
 <li>FireFox 65.0</li>
 <li>Chrome 71.0.3578.98</li>
 <li>Microsoft Edge 42.17134.1.0</li>
 </ul>
-<ul> Not supported for now
+<ul> #####Not supported for now
 <li>IE 11.523</li>
 </ul>
 
