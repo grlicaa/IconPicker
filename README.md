@@ -37,7 +37,7 @@ https://apex.oracle.com/pls/apex/f?p=94650
 ### Tested On (so far):
 
 #### Browsers
-<ul> #Supported
+<ul>
 <li>FireFox 65.0</li>
 <li>Chrome 71.0.3578.98</li>
 <li>Microsoft Edge 42.17134.1.0</li>
@@ -47,6 +47,7 @@ https://apex.oracle.com/pls/apex/f?p=94650
 
 #### Oracle APEX Versions
 <ul>
+<li>Application Express 18.1</li>
 <li>Application Express 18.2</li>
 </ul>
 
