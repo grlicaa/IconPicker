@@ -8,7 +8,19 @@ https://apex.oracle.com/pls/apex/f?p=94650
 ![](https://raw.githubusercontent.com/grlicaa/IconPicker/master/docs/preview/PreviewIP.gif)
 
 ## Change log
+###V 1.1. - 31.01.2018
+<ul>
+<li>Fixed IE issues</li>  
+<li>Support for APEX 18.1</li>  
+</ul>
 
+## ToDo list
+<ul>
+<li>Add required validation</li>
+<li>Add support of "Widget: iconList"</li>  
+<li>Put Icon Categories inside tabs</li>  
+<li>Support different icon librarys</li>
+</ul>
 
 ## Install
 
@@ -29,8 +41,6 @@ https://apex.oracle.com/pls/apex/f?p=94650
 <li>FireFox 65.0</li>
 <li>Chrome 71.0.3578.98</li>
 <li>Microsoft Edge 42.17134.1.0</li>
-</ul>
-<ul> #Not supported for now
 <li>IE 11.523</li>
 </ul>
 

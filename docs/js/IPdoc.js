@@ -2,27 +2,31 @@
 
 var fontapex = fontapex || {};
 
-//foreach for nodeList in IE
-NodeList.prototype.forEach = Array.prototype.forEach;
+//foreach Array for nodeList in IE
+if (!NodeList.prototype.forEach) {
+  NodeList.prototype.forEach = Array.prototype.forEach;
+}
 
 function setElementIcon(p_name, p_val) {
 	$("input#"+p_name+".apex-item-has-icon").parent("div").find("span.apex-item-icon").attr("class","apex-item-icon fa "+p_val);
 }
 function setElementValue(p_name, p_val) {
-		$("input#"+p_name).val(p_val);
-		setElementIcon(p_name, p_val);
+	$("input#"+p_name).val(p_val);
+	setElementIcon(p_name, p_val);
 }
 function setIGElementValue(p_regionId, p_rowId, p_column, p_val) {
-    const ig$ = apex.region(p_regionId).widget();
-    const { model } = ig$.interactiveGrid('getViews', 'grid');
-    const fields = ig$.interactiveGrid('getViews').grid.model.getOption('fields');
+	const widget      = apex.region(p_regionId).widget();
+	const grid        = widget.interactiveGrid('getViews','grid');  
+	const model       = grid.model; 
+    const fields = widget.interactiveGrid('getViews').grid.model.getOption('fields');
+	
     let field = '';
-    Object.keys(fields).forEach((el) => {
-      if (fields[el].elementId === p_column) {
-        field = el;
-      }
-    });
-    model.setRecordValue(p_rowId, field, p_val)	
+	for (var el in fields) {
+		if (fields[el].elementId === p_column) {
+			field = el;
+		}
+	}
+    model.setRecordValue(p_rowId, field, p_val);
 }
 function closeDialogIP(is_grid, p_dialog, p_regionId, p_rowId, p_column, p_val) {
 	if (is_grid) {
