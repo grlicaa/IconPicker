@@ -8,7 +8,7 @@ https://apex.oracle.com/pls/apex/f?p=94650
 ![](https://raw.githubusercontent.com/grlicaa/IconPicker/master/docs/preview/PreviewIP.gif)
 
 ## Change log
-###V 1.1. - 31.01.2018
+#### V 1.1. - 31.01.2018
 <ul>
 <li>Fixed IE issues</li>  
 <li>Support for APEX 18.1</li>  
