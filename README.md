@@ -19,7 +19,7 @@ https://apex.oracle.com/pls/apex/f?p=94650
 <li>Add required validation</li>
 <li>Add support of "Widget: iconList"</li>  
 <li>Put Icon Categories inside tabs</li>  
-<li>Support different icon librarys</li>
+<li>Support different icon libraries</li>
 </ul>
 
 ## Install
