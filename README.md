@@ -11,8 +11,8 @@ https://apex.oracle.com/pls/apex/f?p=94650
 #### V 1.2. - 01.02.2018
 <ul>
 <li>Added support of "Widget: iconList" default: Yes</li>  
-<li>required item validation</li>
-</ul>
+<li>required item validation</li></ul>
+
 #### V 1.1. - 31.01.2018
 <ul>
 <li>Fixed IE issues</li>  
