@@ -40,7 +40,17 @@ function closeDialogIP(is_grid, p_dialog, p_regionId, p_rowId, p_column, p_val) 
 	}
 }
 
-function loadIconPickerDialog(pDCloseB) {
+function addItemList(pItemList) {
+	$(pItemList).each(function () { 
+		$(this).iconList({
+			multiple: false,
+			navigation: true,
+			itemSelector: false
+		});	
+	});		
+}
+
+function loadIconPickerDialog(pDCloseB, pUseIconList) {
 	$("body").append('<div id="IconPickerDialogBox"></div>');
 		/* turn div into dialog */
 	$('#IconPickerDialogBox').dialog(
@@ -55,8 +65,22 @@ function loadIconPickerDialog(pDCloseB) {
                 ,tirggItem : {}
 				,showIconLabel: true
                 ,modalItem : false
+				,useIconList: pUseIconList
                 ,open: function () {
-                    initIcons( fontapex, $(this).dialog("option", "tirggElem"), $(this).dialog("option", "tirggItem"), $(this).dialog("option", "modalItem"), $(this).dialog("option", "showIconLabel"));
+					window.addEventListener("keydown", function(event) {
+							// arrow key
+							if ([37, 38, 39, 40].indexOf(event.keyCode) > -1) {
+								event.preventDefault();
+							}
+						});					
+                    initIcons( fontapex, 
+					           $(this).dialog("option", "tirggElem"), 
+							   $(this).dialog("option", "tirggItem"),  
+							   {	is_grid:$(this).dialog("option", "modalItem"), 
+					                showIconLabel:$(this).dialog("option", "showIconLabel"),
+									useIconList:$(this).dialog("option", "useIconList")
+							   }
+							);
                 }
                 ,close: function () {
                     $("main.dm-Body").remove();
@@ -214,7 +238,7 @@ fontapex.$ = function( selector ){
     return new Sel( selector );
 };
 
-function initIcons( fa, p_dialog, p_item, is_grid, showIconLabel) {
+function initIcons( fa, p_dialog, p_item, pOpt) {
     var $ = fa.$,
         L = 'LARGE',
         S = 'SMALL',
@@ -272,12 +296,12 @@ function initIcons( fa, p_dialog, p_item, is_grid, showIconLabel) {
         var assembleHTML = function (resultSet, iconCategory) {
             var size = _isLarge() === 'true' ? L : S,
                 getEntry = function ( cl ) {
-                    return '<li>' + 
-                        '<a class="dm-Search-result" href="javascript:closeDialogIP('+is_grid+',\''+p_dialog+'\',\''+ITM.regionId+'\',\''+ITM.rowId+'\',\''+ITM.column+'\',\''+ cl +'\');">' +
+                    return '<li role="navigation">' + 
+                        '<a class="dm-Search-result" href="javascript:closeDialogIP('+pOpt.is_grid+',\''+p_dialog+'\',\''+ITM.regionId+'\',\''+ITM.rowId+'\',\''+ITM.column+'\',\''+ cl +'\');" aria-labelledby="iplist">' +
                         '<div class="dm-Search-icon">' +
                         '<span class="t-Icon fa '+ cl +'" aria-hidden="true"></span>' +
                         '</div>' +
-						(showIconLabel?(
+						(pOpt.showIconLabel?(
                         '<div class="dm-Search-info">' +
                         '<span class="dm-Search-class">'+ cl +'</span>' +
                         '</div>'):'') +
@@ -288,7 +312,7 @@ function initIcons( fa, p_dialog, p_item, is_grid, showIconLabel) {
             if (iconCategory) { // keywords is not provided, show everything
                 output = output + '<div class="dm-Search-category">';
                 output = output + '<h2 class="dm-Search-title">' + iconCategory.replace(/_/g,' ').toLowerCase()+ ' Icons</h2>';
-                output = output + '<ul class="dm-Search-list">';
+                output = output + '<ul class="dm-Search-list" id="iplist">';
                 resultSet.forEach(function(iconClass){
                     output = output + getEntry( iconClass.name );
                 });
@@ -302,6 +326,7 @@ function initIcons( fa, p_dialog, p_item, is_grid, showIconLabel) {
                 }
             }
         };
+		
 
         var search = function () {
             if (key.length === 1) {
@@ -399,7 +424,7 @@ function initIcons( fa, p_dialog, p_item, is_grid, showIconLabel) {
                 resultsTitle = resultSet.length === 0 ? 'No results' : resultSet.length + ' Results';
                 output = '<div class="dm-Search-category">' +
                     '<h2 class="dm-Search-title">' + resultsTitle + '</h2>' +
-                    '<ul class="dm-Search-list">' +
+                    '<ul class="dm-Search-list" id="iplist">' +
                     output +
                     '</ul>';
                 output = output + '</div>';
@@ -407,11 +432,16 @@ function initIcons( fa, p_dialog, p_item, is_grid, showIconLabel) {
 
             // finally add output
             document.getElementById( 'icons' ).innerHTML = output;
+			
         };
 
         timeout = setTimeout(function() {
             search();
+			if (pOpt.useIconList)
+				addItemList('ul#iplist');
         }, debounce);
+		
+		
     };
 
     var toggleSize = function ( that, affected ) {
@@ -499,6 +529,8 @@ function initIcons( fa, p_dialog, p_item, is_grid, showIconLabel) {
                 var affectedElem =  icons$.length > 0 ? icons$ : $( '.dm-IconPreview' );
                 toggleSize( this, affectedElem );
             } );
+			
+			
         }
     }
 

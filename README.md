@@ -8,6 +8,11 @@ https://apex.oracle.com/pls/apex/f?p=94650
 ![](https://raw.githubusercontent.com/grlicaa/IconPicker/master/docs/preview/PreviewIP.gif)
 
 ## Change log
+#### V 1.2. - 01.02.2018
+<ul>
+<li>Added support of "Widget: iconList" default: Yes</li>  
+<li>required item validation</li>
+</ul>
 #### V 1.1. - 31.01.2018
 <ul>
 <li>Fixed IE issues</li>  
@@ -15,9 +20,6 @@ https://apex.oracle.com/pls/apex/f?p=94650
 </ul>
 
 ## ToDo list
-<ul>
-<li>Add required validation</li>
-<li>Add support of "Widget: iconList"</li>  
 <li>Put Icon Categories inside tabs</li>  
 <li>Support different icon libraries</li>
 </ul>
