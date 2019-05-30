@@ -8,12 +8,18 @@ https://apex.oracle.com/pls/apex/f?p=94650
 ![](https://raw.githubusercontent.com/grlicaa/IconPicker/master/docs/preview/PreviewIP.gif)
 
 ## Change log
-#### V 1.2. - 01.02.2018
+#### V 1.3. - 11.05.2019
+<ul>
+<li>Field validation on IG fixed (<a href="https://github.com/grlicaa/IconPicker/issues/1" target="_blank">#1</a>)</li>  
+<li>Fixed error : Uncaught TypeError: $(...).iconList (<a href="https://github.com/grlicaa/IconPicker/issues/2" target="_blank">#2</a>)</li>  
+</ul>
+
+#### V 1.2. - 01.02.2019
 <ul>
 <li>Added support of "Widget: iconList" default: Yes</li>  
 <li>required item validation</li></ul>
 
-#### V 1.1. - 31.01.2018
+#### V 1.1. - 31.01.2019
 <ul>
 <li>Fixed IE issues</li>  
 <li>Support for APEX 18.1</li>  
@@ -51,6 +57,7 @@ https://apex.oracle.com/pls/apex/f?p=94650
 <ul>
 <li>Application Express 18.1</li>
 <li>Application Express 18.2</li>
+<li>Application Express 19.1</li>
 </ul>
 
 

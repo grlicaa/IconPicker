@@ -41,13 +41,18 @@ function closeDialogIP(is_grid, p_dialog, p_regionId, p_rowId, p_column, p_val) 
 }
 
 function addItemList(pItemList) {
-	$(pItemList).each(function () { 
-		$(this).iconList({
-			multiple: false,
-			navigation: true,
-			itemSelector: false
-		});	
-	});		
+	$(pItemList).each(function () {
+        try {
+			$(this).iconList({
+				multiple: false,
+				navigation: true,
+				itemSelector: false
+			});		
+        }
+        catch(err) {
+          console.log(err.message);
+        }		
+	});				
 }
 
 function loadIconPickerDialog(pDCloseB, pUseIconList) {
