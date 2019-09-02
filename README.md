@@ -63,10 +63,10 @@ https://apex.oracle.com/pls/apex/f?p=94650
 
 ## About me
 Andrej Grlica<br/>
-Company [Abakus Plus d.o.o.](http://abakus.si/en/home)<br/>
+Company The Right Thing Solutions<br/>
 I have been an Oracle APEX Developer since 2008<br/>
 When I'm not focusing on a code problem, you can find me on:<br/>
-Work Email : [andrej.grlica@abakus.si](mailto:andrej.grlica@abakus.si)<br/>
+Work Email : [andrej.grlica@right-thing.solutions](mailto:andrej.grlica@right-thing.solutions)<br/>
 Private Email : [andrej.grlica@gmail.com](mailto:andrej.grlica@gmail.com)<br/>
 LinkedIn: [Link](https://www.linkedin.com/in/andrej-grlica-303998a4/)<br/>
 Slack (#orclapex) PM:[@grlicaa](https://orclapex.slack.com/messages/@grlicaa/)
