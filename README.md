@@ -65,6 +65,8 @@ https://apex.oracle.com/pls/apex/f?p=94650
 <li>Application Express 18.1</li>
 <li>Application Express 18.2</li>
 <li>Application Express 19.1</li>
+<li>Application Express 19.2</li>
+<li>Application Express 20.1</li>
 </ul>
 
 
