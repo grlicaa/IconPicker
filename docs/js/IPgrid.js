@@ -4,6 +4,7 @@ function IPinit(itemId, opt) {
   const sr$ = item$.addClass('u-vh is-focusable')
 	.parent();
 
+  
   function render(full, value) {
 	var p_val = value||"fa-navicon";
     const out = apex.util.htmlBuilder();
@@ -12,23 +13,23 @@ function IPinit(itemId, opt) {
       .markup('><button')
 	  .attr('id', itemId+'_lov_btn')
 	  .attr('type', 'button')
-	  .attr('class', 't-Button t-Button--noLabel t-Button--icon ig-button-icon-picker'+(!opt.showText?' ip-icon-only':''))
+	  .attr('class', 't-Button t-Button--noLabel t-Button--icon ig-ip-render ig-button-icon-picker'+(!opt.showText?' ip-icon-only':''))
 	  .markup('><span')
 	  .attr('class', ' ig-span-icon-picker fa '+p_val)
 	  .attr('aria-hidden', true)
 	  .optionalAttr('disabled', opt.readOnly)
 	  .markup(' /></button><input')
-      .attr('type', opt.showText?'text':'hidden')
+      .attr('type', 'hidden')
 	  .attr('class', 'ig-input-icon-picker')
       .attr('id', itemId+'_'+index+'_0')
       .attr('name', itemId+'_'+index)
-      .attr('value', value)
+      .attr('value', p_val)
       .attr('tabindex', -1)
       .optionalAttr('disabled', opt.readOnly)
       .markup(' /><label')
       .attr('for', itemId+'_'+index+'_0')
       .markup('>')
-      .content('')
+      .content(opt.showText?p_val:"")
       .markup('</label>')
 	  .markup(' </div>');
 
@@ -70,9 +71,9 @@ function IPinit(itemId, opt) {
     setValue:function(value) {
       item$.val(value);
 	  if (value)
-		item$.closest('div.ig-div-icon-picker').find('span.ig-span-icon-picker').attr('class', 'apex-item-icon ig-span-icon-picker fa '+value);
+		  item$.closest('div.ig-div-icon-picker').find('span.ig-span-icon-picker').attr('class', 'apex-item-icon ig-span-icon-picker fa '+value);
 	  else
-		item$.closest('div.ig-div-icon-picker').find('span.ig-span-icon-picker').attr('class', 'apex-item-icon ig-span-icon-picker fa '+opt.defIcon);  
+		  item$.closest('div.ig-div-icon-picker').find('span.ig-span-icon-picker').attr('class', 'apex-item-icon ig-span-icon-picker fa '+opt.defIcon);  
     },
     disable:function() {
       item$.closest('.ig-div-icon-picker').removeClass('ig-div-icon-picker-enabled');
@@ -92,5 +93,5 @@ function IPinit(itemId, opt) {
       return render(true, value);
     },
   });
-  
 }
+//# sourceMappingURL=IPgrid.js.map

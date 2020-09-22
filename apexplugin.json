@@ -1,6 +1,6 @@
 {
   "name" : "Icon Picker",
-  "version" : "1.2",
+  "version" : "1.4",
   "description" : "Oracle Application Express item Plug-in for Icon selecection (Page item and Interactive Grid)",
   "keywords" : ["icon", "icons", "icon picker", "icon selector", "font apex"],
   "homepage" : "https://github.com/grlicaa/IconPicker",
@@ -17,7 +17,7 @@
   "oracle" : {
     "versions" : ["12.2.0.1", "12.1.0.1", "11.2.0.1"],
     "apex" : {
-      "versions" : ["18.1.0", "18.2.0", "19.1.0"],
+      "versions" : ["18.1.0", "18.2.0", "19.1.0", "19.2.0", "20.1.0"],
       "plugin" : {
         "internalName" : "si.abakus.iconpicker",
         "type" : "item",

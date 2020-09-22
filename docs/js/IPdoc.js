@@ -540,3 +540,5 @@ function initIcons( fa, p_dialog, p_item, pOpt) {
     }
 
 }
+
+//# sourceMappingURL=IPdoc.js.map

@@ -990,6 +990,7 @@ pre {
   padding: 0;
 }
 
+
 .a-IG .ig-span-icon-picker {
     padding: 3px;
 	position:static !important;
@@ -1007,16 +1008,42 @@ pre {
 
 .ig-div-icon-picker .ig-button-icon-picker:not(.ip-icon-only) {
 	position:absolute;
-	top:0px;
+	top:-3px;
 	right:0px;
-	height:100%;
 }
 
+.a-GV-columnItem .ig-div-icon-picker .ig-button-icon-picker:not(.ip-icon-only) {
+	position:absolute;
+  height:100%;
+	top:0px;
+	right:4px;  
+  margin:0;
+}
+
+
+
+/*
 .ig-div-icon-picker .ig-input-icon-picker {
 	width:100%;
 }
+*/
 
 .ig-div-icon-picker .ip-icon-only {
 	position:relative;
-	height:100%;
+  height:100%;
 }
+
+.ig-div-icon-picker .t-Button--icon.ip-icon-only {
+  line-height: 1.6rem;
+  text-align: center;
+  min-width: 4rem;
+}
+
+.ig-div-icon-picker .apex-item-icon {
+  float:none;
+}
+
+
+
+
+/*# sourceMappingURL=IPui.css.map */
