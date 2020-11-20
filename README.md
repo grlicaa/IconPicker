@@ -8,6 +8,11 @@ https://apex.oracle.com/pls/apex/f?p=94650
 ![](https://raw.githubusercontent.com/grlicaa/IconPicker/master/docs/preview/PreviewIP.gif)
 
 ## Change log
+#### V 1.5. - 19.11.2020
+<ul>
+<li>Fixed APEX 20.2 "height: var" problem in css file</li>  
+</ul>
+
 #### V 1.4. - 22.09.2020
 <ul>
 <li>Created #MIN# files</li>  
@@ -67,6 +72,7 @@ https://apex.oracle.com/pls/apex/f?p=94650
 <li>Application Express 19.1</li>
 <li>Application Express 19.2</li>
 <li>Application Express 20.1</li>
+<li>Application Express 20.2</li>
 </ul>
 
 
