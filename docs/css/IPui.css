@@ -374,8 +374,8 @@ pre {
   display: block;
   margin: 0;
   padding: 5px 5px 5px 35px;
-  width: 100%;
   height: 30px;
+  width:80%;
   font-weight: 400;
   font-size: 20px;
   color: #000;
@@ -501,7 +501,6 @@ pre {
   display: flex;
   flex-direction: column;
   padding: 16px;
-  width: 100%;
   color: inherit;
   align-items: center;
   justify-content: center;
@@ -722,7 +721,7 @@ pre {
 .dm-RadioPillSet--large .dm-RadioPillSet-option input + label {
   padding: 5px 24px;
   font-size: 14px;
-  line-height: 20px;
+  line-height: 32px;
 }
 
 
@@ -994,6 +993,7 @@ pre {
 .a-IG .ig-span-icon-picker {
     padding: 3px;
 	position:static !important;
+    margin-inline-start: 0 !important;
 }
 
 .a-IG .ig-button-icon-picker {
@@ -1009,15 +1009,17 @@ pre {
 .ig-div-icon-picker .ig-button-icon-picker:not(.ip-icon-only) {
 	position:absolute;
 	top:-3px;
-	right:0px;
+	right:1px;
+    min-width: 40px;
 }
 
 .a-GV-columnItem .ig-div-icon-picker .ig-button-icon-picker:not(.ip-icon-only) {
 	position:absolute;
-  height:100%;
+    height:100%;
 	top:0px;
-	right:4px;  
-  margin:0;
+	right:1px;  
+    margin:0;
+    min-width: 40px;
 }
 
 
@@ -1047,4 +1049,3 @@ pre {
   height: 100%!important;
   /*height: var(--a-gv-cell-height)!important; /* also works with 20.2*/
 }
-/*# sourceMappingURL=IPui.css.map */

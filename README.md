@@ -8,6 +8,15 @@ https://apex.oracle.com/pls/apex/f?p=94650
 ![](https://raw.githubusercontent.com/grlicaa/IconPicker/master/docs/preview/PreviewIP.gif)
 
 ## Change log
+#### V 2.0. - 06.06.2026 - For versions APEX 22.1 on
+<ul>
+<li>Added more icons to the library</li>  
+<li>CSS fixed for newer versions of APEX (22.1 on)</li>  
+<li>Added "Translatable" on all label based attributes</li>
+<li>Reduced plug-in size</li>
+<li>Fixed "Label is corrupted when the template type is Floating"  (<a href="https://github.com/grlicaa/IconPicker/issues/3" target="_blank">#3</a>)</li>  
+</ul>
+
 #### V 1.5. - 19.11.2020
 <ul>
 <li>Fixed APEX 20.2 "height: var" problem in css file</li>  
@@ -73,6 +82,11 @@ https://apex.oracle.com/pls/apex/f?p=94650
 <li>Application Express 19.2</li>
 <li>Application Express 20.1</li>
 <li>Application Express 20.2</li>
+<li>Application Express 21.1</li>
+<li>Application Express 21.2</li>
+<li>Application Express 22.1</li>
+<li>Application Express 22.2</li>
+<li>Application Express 23.1</li>
 </ul>
 
 
@@ -84,4 +98,3 @@ When I'm not focusing on a code problem, you can find me on:<br/>
 Work Email : [andrej.grlica@right-thing.solutions](mailto:andrej.grlica@right-thing.solutions)<br/>
 Private Email : [andrej.grlica@gmail.com](mailto:andrej.grlica@gmail.com)<br/>
 LinkedIn: [Link](https://www.linkedin.com/in/andrej-grlica-303998a4/)<br/>
-Slack (#orclapex) PM:[@grlicaa](https://orclapex.slack.com/messages/@grlicaa/)

@@ -12,6 +12,7 @@ function setElementIcon(p_name, p_val) {
 }
 function setElementValue(p_name, p_val) {
 	$("input#"+p_name).val(p_val);
+    $("#"+p_name+"_CONTAINER").addClass("js-show-label");
 	setElementIcon(p_name, p_val);
 }
 function setIGElementValue(p_regionId, p_rowId, p_column, p_val) {
@@ -540,5 +541,3 @@ function initIcons( fa, p_dialog, p_item, pOpt) {
     }
 
 }
-
-//# sourceMappingURL=IPdoc.js.map
