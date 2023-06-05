@@ -12,7 +12,7 @@ https://apex.oracle.com/pls/apex/f?p=94650
 <ul>
 <li>Added more icons to the library</li>  
 <li>CSS fixed for newer versions of APEX (22.1 on)</li>  
-<li>Added "Translatable" on all label based attributes</li>
+<li>Added "Translatable" on all label-based attributes</li>
 <li>Reduced plug-in size</li>
 <li>Fixed "Label is corrupted when the template type is Floating"  (<a href="https://github.com/grlicaa/IconPicker/issues/3" target="_blank">#3</a>)</li>  
 </ul>
@@ -76,16 +76,11 @@ https://apex.oracle.com/pls/apex/f?p=94650
 
 #### Oracle APEX Versions
 <ul>
-<li>Application Express 18.1</li>
-<li>Application Express 18.2</li>
-<li>Application Express 19.1</li>
-<li>Application Express 19.2</li>
-<li>Application Express 20.1</li>
-<li>Application Express 20.2</li>
-<li>Application Express 21.1</li>
-<li>Application Express 21.2</li>
-<li>Application Express 22.1</li>
-<li>Application Express 22.2</li>
+<li>Application Express 18.x</li>
+<li>Application Express 19.x</li>
+<li>Application Express 20.x</li>
+<li>Application Express 21.x</li>
+<li>Application Express 22.x</li>
 <li>Application Express 23.1</li>
 </ul>
 
