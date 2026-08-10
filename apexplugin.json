@@ -15,13 +15,13 @@
     "url": "https://github.com/grlicaa/IconPicker.git"
   },
   "oracle": {
-    "versions": ["19c", "21c", "23ai"],
+    "versions": ["19c", "21c", "23ai", "26ai"],
     "apex": {
-      "versions": ["23.2", "24.1", "24.2", "25.1", "25.2", "26.1"],
+      "versions": ["23.2", "24.1", "24.2", "26.1"],
       "plugin": {
         "internalName": "si.abakus.iconpicker",
         "type": "item",
-        "demo": "https://apex.oracle.com/pls/apex/f?p=94650",
+        "demo": "https://oracleapex.com/ords/f?p=94650",
         "previewImage": "https://raw.githubusercontent.com/grlicaa/IconPicker/master/docs/preview/PreviewIP.gif"
       }
     }

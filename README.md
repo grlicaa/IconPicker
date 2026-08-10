@@ -4,8 +4,9 @@ An Oracle APEX item plug-in for picking a Font APEX icon, on a page item or an I
 Grid column.
 
 ## Demo
-A demo application is available on apex.oracle.com<br/>
-https://apex.oracle.com/pls/apex/f?p=94650
+A demo application is available on oracleapex.com<br/>
+https://oracleapex.com/ords/f?p=94650<br/>
+Sign in with `demo` / `demo`.
 
 ## Preview
 ![](https://raw.githubusercontent.com/grlicaa/IconPicker/master/docs/preview/PreviewIP.gif)
@@ -169,9 +170,9 @@ all. Modifiers such as `fa-lg`, `fa-2x`, `fa-rotate-90` and `fa-anim-spin` decla
 and are never mistaken for icons.
 
 This is best effort. When APEX serves its images from the Oracle CDN (`static.oracle.com`,
-as apex.oracle.com and oracleapex.com do) the stylesheet is cross-origin, reading it raises a
-`SecurityError` and the fetch fallback may be refused by CORS. The catalog is then left
-exactly as bundled - never half-pruned. It works on the usual on-premises `/i/` setup.
+as oracleapex.com does) the stylesheet is cross-origin, reading it raises a `SecurityError`
+and the fetch fallback may be refused by CORS. The catalog is then left exactly as bundled -
+never half-pruned. It works on the usual on-premises `/i/` setup.
 
 As a further guard, a scan that turns up fewer than 200 icons is treated as failed rather
 than as "this instance has almost no icons", so a partial parse can never empty the picker.
