@@ -184,7 +184,7 @@ than as "this instance has almost no icons", so a partial parse can never empty 
 ## Supported versions
 
 ### Oracle APEX
-Targets Application Express **23.2 and later**. 3.0 was developed against APEX 26.1.2 and
+Targets Oracle APEX **23.2 and later**. 3.0 was developed against APEX 26.1.2 and
 Font APEX 2.5.1; the export is written in 23.2 format so one file installs on 23.2 through
 26.1 and later.
 
