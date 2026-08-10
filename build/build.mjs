@@ -6,7 +6,7 @@
  * Steps
  *   1. minify src/js/*.js and src/css/*.css into dist/
  *   2. read plsql/plugin_code.plsql
- *   3. emit plug-in/item_type_plugin_si_abakus_iconpicker_apex_261.sql, with every dist
+ *   3. emit plug-in/item_type_plugin_si_abakus_iconpicker_apex_232.sql, with every dist
  *      file hex encoded exactly the way APEX's own exporter writes them
  *   4. decode the generated hex back to bytes and assert it matches dist/, so a broken
  *      export can never reach the repository
@@ -25,7 +25,7 @@ import { PLUGIN, EXPORT_ENV, ATTRIBUTES, FILES } from './plugin-metadata.mjs';
 
 const ROOT   = join( dirname( fileURLToPath( import.meta.url ) ), '..' );
 const DIST   = join( ROOT, 'dist' );
-const TARGET = join( ROOT, 'plug-in', 'item_type_plugin_si_abakus_iconpicker_apex_261.sql' );
+const TARGET = join( ROOT, 'plug-in', 'item_type_plugin_si_abakus_iconpicker_apex_232.sql' );
 
 const BYTES_PER_LINE = 100;      // 200 hex characters, same as an APEX generated export
 

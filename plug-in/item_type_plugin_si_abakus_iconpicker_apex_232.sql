@@ -60,7 +60,7 @@ wwv_flow_imp_shared.create_plugin(
 '-- https://github.com/grlicaa/IconPicker',
 '--',
 '-- This file is the plug-in''s "PL/SQL Code" attribute. build/build.mjs embeds it into',
-'-- plug-in/item_type_plugin_si_abakus_iconpicker_apex_261.sql, so edit it here, never',
+'-- plug-in/item_type_plugin_si_abakus_iconpicker_apex_232.sql, so edit it here, never',
 '-- in the generated export.',
 '--------------------------------------------------------------------------------',
 '',

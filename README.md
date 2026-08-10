@@ -12,7 +12,7 @@ https://apex.oracle.com/pls/apex/f?p=94650
 
 ## Install
 
-1. Import `plug-in/item_type_plugin_si_abakus_iconpicker_apex_261.sql` into your application.
+1. Import `plug-in/item_type_plugin_si_abakus_iconpicker_apex_232.sql` into your application.
 2. Add an item on a page, or a column to an Interactive Grid.
 3. Choose **IconPicker [Plug-in]** as the item type.
 4. Save. IconPicker is ready to use.
@@ -114,7 +114,7 @@ Running APEX 22.1 to 23.1? Import `item_type_plugin_si_abakus_iconpicker_apex_22
 ```
 npm install
 npm run icons      # regenerate src/js/icons.js from the harvested Font APEX catalog
-npm run build      # minify src/, then generate plug-in/..._apex_261.sql
+npm run build      # minify src/, then generate plug-in/..._apex_232.sql
 ```
 
 `npm run build` minifies `src/js` and `src/css` into `dist/`, embeds those files plus
