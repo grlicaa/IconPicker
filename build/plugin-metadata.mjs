@@ -38,14 +38,20 @@ const IG   = 'APEX_APPL_PAGE_IG_COLUMNS';
  */
 const BLACKLIST_HELP = [
     'Hide icons from the picker. One entry per line, or comma separated.<br><br>',
-    '<table>',
-    '<tr><td><strong>fa-bomb, fa-skull</strong></td><td>&nbsp;an icon class name</td></tr>',
-    '<tr><td><strong>COUNTRY_FLAG</strong></td><td>&nbsp;a whole category, as named on its tab</td></tr>',
-    '<tr><td><strong>Country Flag</strong></td><td>&nbsp;the same - spaces and letter case are ignored</td></tr>',
-    '<tr><td><strong>fa-flag-*</strong></td><td>&nbsp;a wildcard, hides every icon that matches</td></tr>',
-    '<tr><td><strong>bomb</strong></td><td>&nbsp;the fa- prefix is optional</td></tr>',
-    '</table>',
-    '<br>',
+    'An entry can be any of:',
+    '<ul>',
+    '<li><strong>fa-bomb</strong> - an icon class name</li>',
+    '<li><strong>bomb</strong> - the same, the fa- prefix is optional</li>',
+    '<li><strong>COUNTRY_FLAG</strong> - a whole category, as named on its tab</li>',
+    '<li><strong>Country Flag</strong> - the same, spaces and letter case are ignored</li>',
+    '<li><strong>fa-flag-*</strong> - a wildcard, hides every icon that matches</li>',
+    '</ul>',
+    'For example:',
+    // help lines are joined with newlines, which <pre> preserves; keep these short so the
+    // block never needs to scroll sideways in the Page Designer help panel
+    '<pre>fa-bomb, fa-skull',
+    'COUNTRY_FLAG',
+    'fa-flag-*</pre>',
     'A category that ends up empty disappears from the tabs as well as the grid.<br><br>',
     'An icon already stored in a row <strong>keeps rendering normally</strong> - blacklisting ',
     'only removes it from the picker, so it cannot be chosen again. Existing data is never ',
