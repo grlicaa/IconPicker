@@ -116,22 +116,36 @@
     // CORS. The catalog is then left exactly as bundled - never half-pruned.
     // ------------------------------------------------------------------
 
-    // Real icons declare content, e.g. ".fa-abacus:before { content: '\f000' }". Modifiers
-    // such as .fa-lg, .fa-rotate-90 and .fa-flip-horizontal also use a :before selector but
-    // set font-family or transform instead, so the content declaration is what tells the
-    // two apart.
-    var ICON_RULE  = /\.fa-([a-z0-9]+(?:-[a-z0-9]+)*)::?(?:before|after)/gi,
+    // Font APEX declares an icon in one of two ways, and both have to count:
+    //
+    //   glyph  .fa-abacus:before  { content: "\f000" }
+    //   image  .fa-flag-ad        { background-image: url(../images/flags/flag-ad.svg) }
+    //
+    // The 253 country flags are the image kind - SVG files, no font glyph, no :before and
+    // no content. Gating on content alone drops every flag even on an APEX that has them.
+    //
+    // Modifiers are what the gate is really there to exclude: .fa-lg, .fa-2x, .fa-anim-spin,
+    // .fa-rotate-90 and friends declare font-family or transform and nothing else. Measured
+    // on Font APEX 2.4: 1360 content rules, 254 background-image rules, 0 declaring both,
+    // and 22 declaring neither - every one of those 22 a modifier.
+    // Each idiom is matched by its own pattern rather than by one loose ".fa-*". Font APEX
+    // uses compound selectors for right-to-left support - ".fa-dir-strict .fa-arrow-left:before"
+    // - and a loose pattern picks the wrapper class up as though it were an icon.
+    var ICON_GLYPH = /\.fa-([a-z0-9]+(?:-[a-z0-9]+)*)::?(?:before|after)/gi,
+        ICON_IMAGE = /\.fa-([a-z0-9]+(?:-[a-z0-9]+)*)(?![\w-])/gi,
         CSS_BLOCK  = /([^{}]+)\{([^{}]*)\}/g,
+        CONTENT_DECL = /(^|[;{\s])content\s*:/,
+        IMAGE_DECL   = /(^|[;{\s])background-image\s*:/,
 
         // below this the scan is treated as failed rather than as "the instance has almost
         // no icons", so a partial parse can never empty the picker
         MIN_TRUSTED_ICONS = 200;
 
-    function namesFromSelector( selectorText, found ) {
+    function namesFromSelector( selectorText, pattern, found ) {
         var match;
 
-        ICON_RULE.lastIndex = 0;
-        while ( ( match = ICON_RULE.exec( selectorText ) ) !== null ) {
+        pattern.lastIndex = 0;
+        while ( ( match = pattern.exec( selectorText ) ) !== null ) {
             found[ "fa-" + match[ 1 ] ] = true;
         }
     }
@@ -141,8 +155,11 @@
 
         CSS_BLOCK.lastIndex = 0;
         while ( ( block = CSS_BLOCK.exec( cssText ) ) !== null ) {
-            if ( /(^|[;{\s])content\s*:/.test( block[ 2 ] ) ) {
-                namesFromSelector( block[ 1 ], found );
+            if ( CONTENT_DECL.test( block[ 2 ] ) ) {
+                namesFromSelector( block[ 1 ], ICON_GLYPH, found );
+            }
+            if ( IMAGE_DECL.test( block[ 2 ] ) ) {
+                namesFromSelector( block[ 1 ], ICON_IMAGE, found );
             }
         }
     }
@@ -164,8 +181,15 @@
             }
             for ( j = 0; j < rules.length; j++ ) {
                 rule = rules[ j ];
-                if ( rule.selectorText && rule.style && rule.style.content ) {
-                    namesFromSelector( rule.selectorText, found );
+
+                if ( !rule.selectorText || !rule.style ) {
+                    continue;
+                }
+                if ( rule.style.content ) {
+                    namesFromSelector( rule.selectorText, ICON_GLYPH, found );
+                }
+                if ( rule.style.backgroundImage ) {
+                    namesFromSelector( rule.selectorText, ICON_IMAGE, found );
                 }
             }
         }

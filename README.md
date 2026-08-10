@@ -147,10 +147,26 @@ reconciles the catalog against it:
 - icons it has that this build does not know about are added under `OTHER`,
 - any category left empty disappears, chips and all.
 
-On APEX 23.2 that takes the picker from 1,594 entries to 1,253, removes the four categories
-above, and surfaces 91 older icons (`fa-automobile`, `fa-bank`, `fa-bar-chart-o`, ...) that
-2.5.1 has since dropped but your instance still renders. On APEX 26.1 nothing changes. It
-happens before the first paint, so there is no flash of icons that then vanish.
+Measured against real instances:
+
+| APEX | Font APEX | Entries | Categories removed | `OTHER` |
+|---|---|---|---|---|
+| 23.2 | 2.2 | 1,594 → 1,253 | AI, Business, Construction, Country flag | 91 |
+| 24.1 | 2.3 | 1,594 → 1,327 | Construction, Country flag | 86 |
+| 24.2 | 2.4 | 1,594 → 1,581 | Construction | 87 |
+| 26.1 | 2.5.1 | unchanged | none | - |
+
+`OTHER` holds icons your instance renders that 2.5.1 has since dropped - `fa-automobile`,
+`fa-bank`, `fa-bar-chart-o` and friends - so values already stored against those names stay
+selectable. The reconcile happens before the first paint, so there is no flash of icons that
+then vanish.
+
+Both ways Font APEX declares an icon are recognised: glyphs
+(`.fa-abacus:before { content: "\f000" }`) and images
+(`.fa-flag-ad { background-image: url(flags/flag-ad.svg) }`). The 253 country flags are the
+image kind, which is why they survive on 24.2 but not on 23.2, where they do not exist at
+all. Modifiers such as `fa-lg`, `fa-2x`, `fa-rotate-90` and `fa-anim-spin` declare neither
+and are never mistaken for icons.
 
 This is best effort. When APEX serves its images from the Oracle CDN (`static.oracle.com`,
 as apex.oracle.com and oracleapex.com do) the stylesheet is cross-origin, reading it raises a
