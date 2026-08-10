@@ -8,6 +8,12 @@
  * Every rule below is scoped to the picker dialog or to the plug-in's own item markup.
  * Colours come from Universal Theme custom properties with literal fallbacks, so Vita,
  * Redwood and the dark theme styles all work without a separate build.
+ *
+ * Specificity note: APEX loads plug-in CSS BEFORE the theme and Font APEX. Observed order
+ * on a real page is Core -> Theme-Standard -> iconpicker -> font-apex -> Core -> Vita. So a
+ * rule that merely ties with a theme rule loses. Anywhere this stylesheet touches an
+ * element that also carries .fa, .t-Button or .apex-item-*, the selector is deliberately
+ * given an extra class to outrank them.
  */
 
 .a-IconPicker {
@@ -109,6 +115,15 @@
     color: var(--a-ip-text);
 }
 
+.a-IconPicker .a-IconPicker-dismiss .fa {
+    display: inline-block;
+    width: auto;
+    height: auto;
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1;
+}
+
 /* --------------------------------------------------------------- toolbar */
 
 .a-IconPicker-toolbar {
@@ -125,12 +140,20 @@
     min-width: 0;
 }
 
-.a-IconPicker-searchIcon {
+/* Core.min.css has ".apex-icons-fontapex .fa { position: relative }" and APEX loads Core
+   again after the plug-in stylesheet, so anything at or below (0,2,0) loses and the
+   magnifier drops out of the field onto a line of its own. Hence the trailing .fa. */
+.a-IconPicker .a-IconPicker-searchIcon.fa {
     position: absolute;
     top: 50%;
     left: .625rem;
     transform: translateY(-50%);
+    width: auto;
+    height: auto;
+    margin: 0;
     color: var(--a-ip-muted);
+    font-size: 1rem;
+    line-height: 1;
     pointer-events: none;
 }
 
@@ -153,7 +176,9 @@
 
 .a-IconPicker-size {
     display: flex;
+    align-items: stretch;
     flex: 0 0 auto;
+    height: 2.25rem;                    /* same as the search field, so the two line up */
     border: 1px solid var(--a-ip-border);
     border-radius: var(--ut-field-border-radius, 3px);
     overflow: hidden;
@@ -168,19 +193,27 @@
 }
 
 .a-IconPicker-size label {
+    display: flex;
+    align-items: center;
     margin: 0;
-    padding: .375rem .75rem;
+    padding: 0 .75rem;
     background-color: var(--a-ip-background);
     color: var(--a-ip-muted);
     font-size: .75rem;
-    line-height: 1.5;
+    font-weight: 400;
+    line-height: 1;
+    white-space: nowrap;
     cursor: pointer;
     user-select: none;
 }
 
+/* Core.min.css bolds the checked label of any radio pill via
+   'input[type="radio"]:checked + label' (0,2,1), so the weight is set here at (0,3,1)
+   rather than left to whichever sheet happens to load last */
 .a-IconPicker-size input[type="radio"]:checked + label {
     background-color: var(--a-ip-accent);
     color: var(--a-ip-accent-text);
+    font-weight: 600;
 }
 
 .a-IconPicker-size input[type="radio"]:focus-visible + label {
@@ -292,7 +325,11 @@
     outline-offset: -1px;
 }
 
-.a-IconPicker-itemIcon.fa {
+.a-IconPicker .a-IconPicker-itemIcon.fa {
+    display: block;
+    width: auto;
+    height: auto;
+    margin: 0;
     font-size: var(--a-ip-icon-size);
     line-height: 1.5;
 }
@@ -362,9 +399,39 @@
     align-items: center;
     gap: .25rem;
     width: 100%;
+    min-width: 0;
+}
+
+/* Universal Theme gives .t-Button--icon.t-Button--noLabel 7px/11px padding around a
+   min-width of 28px, which leaves a 6px content box. That is only wide enough for the
+   theme's own .t-Icon, so the plug-in sizes its button itself. The extra class keeps this
+   ahead of the theme, which loads later. */
+.ig-div-icon-picker .t-Button.ig-button-icon-picker {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    align-self: center;
+    width: 1.75rem;
+    min-width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    line-height: 1;
+}
+
+.ig-div-icon-picker .ig-span-icon-picker.fa {
+    display: block;
+    width: auto;
+    min-width: 0;
+    height: auto;
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1;
 }
 
 .ig-div-icon-picker > label {
+    flex: 1 1 auto;
+    min-width: 0;
     margin: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -377,8 +444,4 @@
 
 .ig-div-icon-picker-disabled {
     opacity: .6;
-}
-
-.ig-span-icon-picker.fa {
-    line-height: 1;
 }

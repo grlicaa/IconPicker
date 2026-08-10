@@ -514,7 +514,10 @@
                 + '<div class="a-IconPicker-chips" role="group" aria-label="Icon categories" hidden></div>'
                 + '<div id="' + DIALOG_ID + 'Grid" class="a-IconPicker-grid" role="region" aria-live="polite"></div>'
                 + '<div class="a-IconPicker-footer">'
-                    + '<button type="submit" class="a-IconPicker-cancel t-Button" value="cancel"></button>'
+                    // no t-Button here: plug-in CSS loads before the theme, so sharing a
+                    // theme class means the theme wins every tie and the result is a
+                    // half-themed button
+                    + '<button type="submit" class="a-IconPicker-cancel" value="cancel"></button>'
                 + "</div>"
             + "</form>";
 
@@ -863,9 +866,14 @@
         global.apex.item.create( itemId, {
             setValue: function ( value ) {
                 item$.val( value );
+                // deliberately no "apex-item-icon" here. 2.0 added it and the grid then
+                // styled the span as a page item icon - display:flex, a fixed 28px width -
+                // inside a button whose theme padding leaves a 6px content box, so the
+                // glyph overflowed and was clipped the moment a cell was selected. This
+                // has to match what render() and the plug-in PL/SQL emit.
                 item$.closest( "div.ig-div-icon-picker" )
                     .find( "span.ig-span-icon-picker" )
-                    .attr( "class", "apex-item-icon ig-span-icon-picker fa " + ( value || defaultIcon ) );
+                    .attr( "class", "ig-span-icon-picker fa " + ( value || defaultIcon ) );
             },
             disable: function () {
                 item$.closest( ".ig-div-icon-picker" )
