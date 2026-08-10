@@ -1,0 +1,384 @@
+/*!
+ * Icon Picker 3.0 - Oracle APEX item plug-in
+ * https://github.com/grlicaa/IconPicker
+ *
+ * Replaces IPui.css from 2.0, which was the whole Font APEX documentation site stylesheet
+ * and restyled html, body and * on every page the plug-in was used on.
+ *
+ * Every rule below is scoped to the picker dialog or to the plug-in's own item markup.
+ * Colours come from Universal Theme custom properties with literal fallbacks, so Vita,
+ * Redwood and the dark theme styles all work without a separate build.
+ */
+
+.a-IconPicker {
+    --a-ip-width: 600px;
+    --a-ip-height: 800px;
+    --a-ip-tile: 5.5rem;
+    --a-ip-icon-size: 1.5rem;
+    --a-ip-background: var(--ut-body-background-color, #fff);
+    --a-ip-text: var(--ut-body-text-color, #303030);
+    --a-ip-muted: var(--ut-body-title-text-color, #707070);
+    --a-ip-border: var(--ut-body-border-color, rgba(0, 0, 0, .12));
+    --a-ip-surface: var(--ut-component-background-color, rgba(0, 0, 0, .035));
+    --a-ip-accent: var(--ut-palette-primary, #0572ce);
+    --a-ip-accent-text: var(--ut-palette-primary-contrast, #fff);
+
+    box-sizing: border-box;
+    width: min(var(--a-ip-width), calc(100vw - 2rem));
+    max-width: calc(100vw - 2rem);
+    height: min(var(--a-ip-height), calc(100vh - 2rem));
+    max-height: calc(100vh - 2rem);
+    padding: 0;
+    border: 1px solid var(--a-ip-border);
+    border-radius: var(--ut-body-border-radius, 4px);
+    background-color: var(--a-ip-background);
+    color: var(--a-ip-text);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, .24);
+    overflow: hidden;
+}
+
+.a-IconPicker::backdrop {
+    background-color: rgba(0, 0, 0, .45);
+}
+
+.a-IconPicker--resizable {
+    resize: both;
+}
+
+.a-IconPicker *,
+.a-IconPicker *::before,
+.a-IconPicker *::after {
+    box-sizing: border-box;
+}
+
+.a-IconPicker .u-vh {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.a-IconPicker-form {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    margin: 0;
+}
+
+/* ---------------------------------------------------------------- header */
+
+.a-IconPicker-header {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    flex: 0 0 auto;
+    padding: .75rem 1rem;
+    border-bottom: 1px solid var(--a-ip-border);
+}
+
+.a-IconPicker-title {
+    flex: 1 1 auto;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--a-ip-text);
+}
+
+.a-IconPicker-dismiss {
+    flex: 0 0 auto;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background-color: transparent;
+    color: var(--a-ip-muted);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.a-IconPicker-dismiss:hover {
+    background-color: var(--a-ip-surface);
+    color: var(--a-ip-text);
+}
+
+/* --------------------------------------------------------------- toolbar */
+
+.a-IconPicker-toolbar {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    flex: 0 0 auto;
+    padding: .75rem 1rem;
+}
+
+.a-IconPicker-search {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.a-IconPicker-searchIcon {
+    position: absolute;
+    top: 50%;
+    left: .625rem;
+    transform: translateY(-50%);
+    color: var(--a-ip-muted);
+    pointer-events: none;
+}
+
+.a-IconPicker-searchInput {
+    width: 100%;
+    height: 2.25rem;
+    padding: 0 .75rem 0 2rem;
+    border: 1px solid var(--a-ip-border);
+    border-radius: var(--ut-field-border-radius, 3px);
+    background-color: var(--ut-field-background-color, #fff);
+    color: var(--a-ip-text);
+    font-family: inherit;
+    font-size: .875rem;
+}
+
+.a-IconPicker-searchInput:focus {
+    outline: 2px solid var(--a-ip-accent);
+    outline-offset: -1px;
+}
+
+.a-IconPicker-size {
+    display: flex;
+    flex: 0 0 auto;
+    border: 1px solid var(--a-ip-border);
+    border-radius: var(--ut-field-border-radius, 3px);
+    overflow: hidden;
+}
+
+.a-IconPicker-size input[type="radio"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.a-IconPicker-size label {
+    margin: 0;
+    padding: .375rem .75rem;
+    background-color: var(--a-ip-background);
+    color: var(--a-ip-muted);
+    font-size: .75rem;
+    line-height: 1.5;
+    cursor: pointer;
+    user-select: none;
+}
+
+.a-IconPicker-size input[type="radio"]:checked + label {
+    background-color: var(--a-ip-accent);
+    color: var(--a-ip-accent-text);
+}
+
+.a-IconPicker-size input[type="radio"]:focus-visible + label {
+    outline: 2px solid var(--a-ip-accent);
+    outline-offset: -2px;
+}
+
+/* ----------------------------------------------------------------- chips */
+
+.a-IconPicker-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .25rem;
+    flex: 0 0 auto;
+    padding: 0 1rem .75rem;
+}
+
+.a-IconPicker-chips[hidden] {
+    display: none;
+}
+
+.a-IconPicker-chip {
+    padding: .1875rem .625rem;
+    border: 1px solid var(--a-ip-border);
+    border-radius: 999px;
+    background-color: transparent;
+    color: var(--a-ip-muted);
+    font-family: inherit;
+    font-size: .75rem;
+    line-height: 1.5;
+    white-space: nowrap;
+    text-transform: capitalize;
+    cursor: pointer;
+}
+
+.a-IconPicker-chip:hover {
+    background-color: var(--a-ip-surface);
+    color: var(--a-ip-text);
+}
+
+.a-IconPicker-chip.is-active {
+    border-color: var(--a-ip-accent);
+    background-color: var(--a-ip-accent);
+    color: var(--a-ip-accent-text);
+}
+
+/* ------------------------------------------------------------------ grid */
+
+.a-IconPicker-grid {
+    flex: 1 1 auto;
+    padding: 0 1rem 1rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.a-IconPicker-category + .a-IconPicker-category {
+    margin-top: 1.5rem;
+}
+
+.a-IconPicker-categoryTitle {
+    margin: 0 0 .5rem;
+    padding-bottom: .25rem;
+    border-bottom: 1px solid var(--a-ip-border);
+    color: var(--a-ip-muted);
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.a-IconPicker-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--a-ip-tile), 1fr));
+    gap: .25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.a-IconPicker-listItem {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.a-IconPicker-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: .375rem;
+    width: 100%;
+    padding: .625rem .25rem;
+    border: 1px solid transparent;
+    border-radius: var(--ut-body-border-radius, 4px);
+    background-color: transparent;
+    color: var(--a-ip-text);
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.a-IconPicker-item:hover {
+    border-color: var(--a-ip-border);
+    background-color: var(--a-ip-surface);
+}
+
+.a-IconPicker-item:focus-visible {
+    outline: 2px solid var(--a-ip-accent);
+    outline-offset: -1px;
+}
+
+.a-IconPicker-itemIcon.fa {
+    font-size: var(--a-ip-icon-size);
+    line-height: 1.5;
+}
+
+.a-IconPicker--large {
+    --a-ip-tile: 7rem;
+    --a-ip-icon-size: 2rem;
+}
+
+.a-IconPicker-itemLabel {
+    display: block;
+    width: 100%;
+    color: var(--a-ip-muted);
+    font-size: .6875rem;
+    line-height: 1.3;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+/* ---------------------------------------------------------------- footer */
+
+.a-IconPicker-footer {
+    display: flex;
+    justify-content: flex-end;
+    flex: 0 0 auto;
+    padding: .75rem 1rem;
+    border-top: 1px solid var(--a-ip-border);
+}
+
+.a-IconPicker-cancel {
+    padding: .375rem 1rem;
+    border: 1px solid var(--a-ip-border);
+    border-radius: var(--ut-button-border-radius, 3px);
+    background-color: var(--a-ip-surface);
+    color: var(--a-ip-text);
+    font-family: inherit;
+    font-size: .875rem;
+    cursor: pointer;
+}
+
+.a-IconPicker-cancel:hover {
+    border-color: var(--a-ip-muted);
+}
+
+@media screen and (max-width: 640px) {
+    .a-IconPicker {
+        --a-ip-tile: 4.5rem;
+    }
+
+    .a-IconPicker-toolbar {
+        flex-wrap: wrap;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .a-IconPicker,
+    .a-IconPicker * {
+        transition: none !important;
+    }
+}
+
+/* ------------------------------------------------------- item rendering */
+/* the plug-in's own markup on the host page - deliberately narrow selectors */
+
+.ig-div-icon-picker {
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+    width: 100%;
+}
+
+.ig-div-icon-picker > label {
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ig-button-icon-picker.ip-icon-only + input + label {
+    display: none;
+}
+
+.ig-div-icon-picker-disabled {
+    opacity: .6;
+}
+
+.ig-span-icon-picker.fa {
+    line-height: 1;
+}

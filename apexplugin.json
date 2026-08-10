@@ -1,28 +1,28 @@
 {
-  "name" : "Icon Picker",
-  "version" : "2.0",
-  "description" : "Oracle Application Express item Plug-in for Icon selecection (Page item and Interactive Grid)",
-  "keywords" : ["icon", "icons", "icon picker", "icon selector", "font apex"],
-  "homepage" : "https://github.com/grlicaa/IconPicker",
-  "license" : "MIT",
-  "author" : {
-    "name" : "Andrej Grlica",
-    "email" : "andrej.grlica@gmail.com",
-    "twitter" : "AndrejGrlica",
+  "name": "Icon Picker",
+  "version": "3.0",
+  "description": "Oracle APEX item Plug-in for Icon selection (Page item and Interactive Grid), built on Font APEX 2.5.1",
+  "keywords": ["icon", "icons", "icon picker", "icon selector", "font apex"],
+  "homepage": "https://github.com/grlicaa/IconPicker",
+  "license": "MIT",
+  "author": {
+    "name": "Andrej Grlica",
+    "email": "andrej.grlica@gmail.com",
+    "twitter": "AndrejGrlica"
   },
-  "repository" : {
-    "type" : "git",
-    "url" : "https://github.com/grlicaa/IconPicker.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/grlicaa/IconPicker.git"
   },
-  "oracle" : {
-    "versions" : ["12.2.0.1", "12.1.0.1", "11.2.0.1", "18.x", "19.x"],
-    "apex" : {
-      "versions" : ["18.1", "18.2", "19.1", "19.2", "20.1", "20.2", "21.1", "21.2", "22.1", "22.2", "23.1"],
-      "plugin" : {
-        "internalName" : "si.abakus.iconpicker",
-        "type" : "item",
-        "demo" : "https://apex.oracle.com/pls/apex/f?p=94650",
-        "previewImage" : "https://raw.githubusercontent.com/grlicaa/IconPicker/master/docs/preview/PreviewIP.gif"
+  "oracle": {
+    "versions": ["19c", "21c", "23ai"],
+    "apex": {
+      "versions": ["23.2", "24.1", "24.2", "25.1", "25.2", "26.1"],
+      "plugin": {
+        "internalName": "si.abakus.iconpicker",
+        "type": "item",
+        "demo": "https://apex.oracle.com/pls/apex/f?p=94650",
+        "previewImage": "https://raw.githubusercontent.com/grlicaa/IconPicker/master/docs/preview/PreviewIP.gif"
       }
     }
   }
