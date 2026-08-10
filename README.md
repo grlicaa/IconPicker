@@ -32,6 +32,11 @@ Running APEX 22.1 to 23.1? Import `item_type_plugin_si_abakus_iconpicker_apex_22
 - **Font APEX 2.5.1**, the icon set that ships with APEX 26.1: 1,541 icons across 24
   categories, up from 1,262. New `AI`, `BUSINESS`, `CONSTRUCTION` and `COUNTRY_FLAG`
   (253 flags) categories, plus Oracle's `NEW` group.
+- **The picker adapts to your APEX release.** On first open it reads the instance's own
+  Font APEX stylesheet and drops icons that release does not have, adds ones it does not
+  know about under `OTHER`, and removes any category left empty. On APEX 23.2 the four new
+  categories above disappear instead of rendering as blank tiles. See
+  [The picker only offers icons your APEX release actually has](#the-picker-only-offers-icons-your-apex-release-actually-has).
 - **Category filter chips** above the grid, so a 1,500 icon list narrows to one category
   in a click. Chips and search compose. (ToDo item from 2.0.)
 - **No jQuery UI.** The dialog is a native `<dialog>`. jQuery UI is deprecated in APEX and
@@ -129,16 +134,31 @@ browser_navigate  https://oracleapex.com/ords/r/apex_pm/ut/icons
 browser_evaluate  () => JSON.stringify( window.apexIcons )
 ```
 
-### Icons newer than this build
+### The picker only offers icons your APEX release actually has
 
-On open, the picker also scans the running instance's Font APEX stylesheet and adds any
-`.fa-*` class it does not already know about to an `OTHER` category, so a newer Font APEX
-than the one bundled here still shows its new icons.
+The bundled catalog is Font APEX 2.5.1, the version that ships with APEX 26.1. Older
+releases have fewer icons - APEX 23.2 has no `AI`, `BUSINESS`, `CONSTRUCTION` or
+`COUNTRY_FLAG` icons at all - and showing those would just give you blank tiles.
+
+So on first open the picker reads the running instance's own Font APEX stylesheet and
+reconciles the catalog against it:
+
+- icons the instance does not have are dropped,
+- icons it has that this build does not know about are added under `OTHER`,
+- any category left empty disappears, chips and all.
+
+On APEX 23.2 that takes the picker from 1,594 entries to 1,253, removes the four categories
+above, and surfaces 91 older icons (`fa-automobile`, `fa-bank`, `fa-bar-chart-o`, ...) that
+2.5.1 has since dropped but your instance still renders. On APEX 26.1 nothing changes. It
+happens before the first paint, so there is no flash of icons that then vanish.
 
 This is best effort. When APEX serves its images from the Oracle CDN (`static.oracle.com`,
 as apex.oracle.com and oracleapex.com do) the stylesheet is cross-origin, reading it raises a
-`SecurityError` and the fetch fallback may be refused by CORS. The scan then silently does
-nothing and the bundled catalog is used. It works on the usual on-premises `/i/` setup.
+`SecurityError` and the fetch fallback may be refused by CORS. The catalog is then left
+exactly as bundled - never half-pruned. It works on the usual on-premises `/i/` setup.
+
+As a further guard, a scan that turns up fewer than 200 icons is treated as failed rather
+than as "this instance has almost no icons", so a partial parse can never empty the picker.
 
 ## ToDo
 

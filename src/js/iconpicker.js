@@ -34,7 +34,7 @@
         activeCategory  = ALL_CHIP,
         returnFocusTo   = null,
         searchTimer     = null,
-        mergeAttempted  = false;
+        syncState       = "pending";        // pending | done, see syncWithRuntime
 
     // interactive grid columns whose delegated click handler is already bound
     var boundGridColumns = Object.create( null );
@@ -101,29 +101,57 @@
     }
 
     // ------------------------------------------------------------------
-    // runtime merge
+    // runtime sync
     //
-    // Best effort only. When the instance serves images from the Oracle CDN the Font APEX
-    // stylesheet is cross-origin: reading cssRules raises SecurityError and the fetch may be
-    // refused by CORS. Both failures are swallowed and the bundled catalog is used as-is.
-    // On the common on-premises "/i/" same-origin setup the CSSOM path works and any icon
-    // added by a newer Font APEX than the one bundled here shows up under OTHER.
+    // The bundled catalog is Font APEX 2.5.1, the release that ships with APEX 26.1. On an
+    // older APEX a big part of it does not exist - APEX 23.2 has no AI, BUSINESS,
+    // CONSTRUCTION or COUNTRY_FLAG icons at all - and those would otherwise render as blank
+    // tiles. So on first open the running instance's own Font APEX stylesheet is read and
+    // the catalog is reconciled against it: icons the instance does not have are dropped,
+    // icons it has that this build does not know about are added under OTHER, and any
+    // category left empty disappears.
+    //
+    // Best effort. When APEX serves its images from the Oracle CDN the stylesheet is
+    // cross-origin, cssRules raises SecurityError and the fetch fallback may be refused by
+    // CORS. The catalog is then left exactly as bundled - never half-pruned.
     // ------------------------------------------------------------------
 
-    var ICON_RULE = /\.fa-([a-z0-9]+(?:-[a-z0-9]+)*)::?before/gi;
+    // Real icons declare content, e.g. ".fa-abacus:before { content: '\f000' }". Modifiers
+    // such as .fa-lg, .fa-rotate-90 and .fa-flip-horizontal also use a :before selector but
+    // set font-family or transform instead, so the content declaration is what tells the
+    // two apart.
+    var ICON_RULE  = /\.fa-([a-z0-9]+(?:-[a-z0-9]+)*)::?(?:before|after)/gi,
+        CSS_BLOCK  = /([^{}]+)\{([^{}]*)\}/g,
 
-    function namesFromCss( cssText, found ) {
+        // below this the scan is treated as failed rather than as "the instance has almost
+        // no icons", so a partial parse can never empty the picker
+        MIN_TRUSTED_ICONS = 200;
+
+    function namesFromSelector( selectorText, found ) {
         var match;
 
         ICON_RULE.lastIndex = 0;
-        while ( ( match = ICON_RULE.exec( cssText ) ) !== null ) {
+        while ( ( match = ICON_RULE.exec( selectorText ) ) !== null ) {
             found[ "fa-" + match[ 1 ] ] = true;
         }
     }
 
-    function namesFromCssom( found ) {
-        var sheets = global.document.styleSheets,
-            i, rules, j;
+    function namesFromCssText( cssText, found ) {
+        var block;
+
+        CSS_BLOCK.lastIndex = 0;
+        while ( ( block = CSS_BLOCK.exec( cssText ) ) !== null ) {
+            if ( /(^|[;{\s])content\s*:/.test( block[ 2 ] ) ) {
+                namesFromSelector( block[ 1 ], found );
+            }
+        }
+    }
+
+    /** Synchronous, and the path that works on a same-origin "/i/" APEX instance. */
+    function namesFromCssom() {
+        var found  = Object.create( null ),
+            sheets = global.document.styleSheets,
+            i, rules, j, rule;
 
         for ( i = 0; i < sheets.length; i++ ) {
             if ( !/font-apex/i.test( sheets[ i ].href || "" ) ) {
@@ -132,21 +160,24 @@
             try {
                 rules = sheets[ i ].cssRules;
             } catch ( e ) {
-                continue;                   // cross-origin stylesheet
+                continue;                                   // cross-origin stylesheet
             }
             for ( j = 0; j < rules.length; j++ ) {
-                if ( rules[ j ].selectorText ) {
-                    namesFromCss( rules[ j ].selectorText, found );
+                rule = rules[ j ];
+                if ( rule.selectorText && rule.style && rule.style.content ) {
+                    namesFromSelector( rule.selectorText, found );
                 }
             }
         }
+
+        return found;
     }
 
-    function namesFromFetch( found ) {
+    function namesFromFetch() {
         var link = global.document.querySelector( 'link[rel="stylesheet"][href*="font-apex"]' );
 
         if ( !link || !global.fetch ) {
-            return Promise.resolve();
+            return Promise.resolve( null );
         }
 
         return global.fetch( link.href )
@@ -154,62 +185,100 @@
                 return response.ok ? response.text() : "";
             } )
             .then( function ( text ) {
-                namesFromCss( text, found );
+                var found = Object.create( null );
+
+                namesFromCssText( text, found );
+                return found;
             } )
             .catch( function () {
-                // blocked by CORS, offline, whatever - the bundled catalog still works
+                return null;                                // blocked by CORS, offline, ...
             } );
     }
 
     /**
-     * Adds any icon the running APEX instance knows about but this build does not.
-     * Resolves to true when the catalog changed.
+     * Reconciles the bundled catalog with what the instance actually ships.
+     * @return {boolean} true when the catalog changed.
      */
-    function mergeRuntimeIcons() {
-        if ( mergeAttempted ) {
-            return Promise.resolve( false );
-        }
-        mergeAttempted = true;
-
-        var found = Object.create( null );
-
-        try {
-            namesFromCssom( found );
-        } catch ( e ) {
-            // never let a stylesheet quirk stop the picker from opening
+    function applyRuntimeIcons( found ) {
+        if ( !found || Object.keys( found ).length < MIN_TRUSTED_ICONS ) {
+            return false;
         }
 
-        var next = Object.keys( found ).length
-            ? Promise.resolve()
-            : namesFromFetch( found );
+        var known   = Object.create( null ),
+            changed = false,
+            extra   = [];
 
-        return next.then( function () {
-            var known = Object.create( null ),
-                extra = [];
-
-            flatIcons().forEach( function ( icon ) {
+        Object.keys( ip.icons ).forEach( function ( category ) {
+            var kept = ip.icons[ category ].filter( function ( icon ) {
                 known[ icon.name ] = true;
+                return found[ icon.name ];
             } );
 
-            Object.keys( found ).forEach( function ( name ) {
-                if ( !known[ name ] ) {
-                    extra.push( { name: name } );
-                }
-            } );
-
-            if ( !extra.length ) {
-                return false;
+            if ( kept.length !== ip.icons[ category ].length ) {
+                changed = true;
             }
+            if ( kept.length ) {
+                ip.icons[ category ] = kept;
+            } else {
+                delete ip.icons[ category ];                // nothing left to show
+            }
+        } );
 
+        Object.keys( found ).forEach( function ( name ) {
+            if ( !known[ name ] ) {
+                extra.push( { name: name } );
+            }
+        } );
+
+        if ( extra.length ) {
             extra.sort( function ( a, b ) {
                 return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
             } );
-
             ip.icons.OTHER = ( ip.icons.OTHER || [] ).concat( extra );
-            return true;
-        } ).catch( function () {
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    /**
+     * Runs before the first render so the grid is never drawn with icons the instance
+     * cannot display. Returns true when it succeeded and no async attempt is needed.
+     */
+    function syncWithRuntime() {
+        if ( syncState !== "pending" ) {
             return false;
-        } );
+        }
+
+        var found;
+
+        try {
+            found = namesFromCssom();
+        } catch ( e ) {
+            found = null;                   // a stylesheet quirk must not stop the picker
+        }
+
+        if ( found && Object.keys( found ).length >= MIN_TRUSTED_ICONS ) {
+            syncState = "done";
+            applyRuntimeIcons( found );
+            return true;
+        }
+
+        return false;
+    }
+
+    /** Fallback for stylesheets the CSSOM would not hand over. Never rejects. */
+    function syncWithRuntimeAsync() {
+        if ( syncState !== "pending" ) {
+            return Promise.resolve( false );
+        }
+        syncState = "done";
+
+        return namesFromFetch()
+            .then( applyRuntimeIcons )
+            .catch( function () {
+                return false;
+            } );
     }
 
     // ------------------------------------------------------------------
@@ -297,6 +366,16 @@
             + "</div>";
     }
 
+    /**
+     * The runtime sync can delete the category the chips were filtered to, so this runs
+     * before every render, not only when the chips themselves are redrawn.
+     */
+    function normaliseActiveCategory() {
+        if ( activeCategory !== ALL_CHIP && !ip.icons[ activeCategory ] ) {
+            activeCategory = ALL_CHIP;
+        }
+    }
+
     function visibleCategories() {
         var all = Object.keys( ip.icons );
 
@@ -311,6 +390,8 @@
         var showLabel = !activeTarget || activeTarget.options.showLabels !== false,
             key       = ( searchInput.value || "" ).toUpperCase().trim().replace( / /g, "-" ),
             html      = "";
+
+        normaliseActiveCategory();
 
         if ( key === "" ) {
             visibleCategories().forEach( function ( category ) {
@@ -355,9 +436,7 @@
             return;
         }
 
-        if ( categories.indexOf( activeCategory ) < 0 ) {
-            activeCategory = ALL_CHIP;      // category disappeared, fall back to All
-        }
+        normaliseActiveCategory();
 
         html = [ ALL_CHIP ].concat( categories ).map( function ( category ) {
             var isAll   = category === ALL_CHIP,
@@ -527,6 +606,10 @@
         element.style.setProperty( "--a-ip-height", ( options.height || 800 ) + "px" );
         element.classList.toggle( "a-IconPicker--resizable", options.resizable !== false );
 
+        // reconcile with the instance's own Font APEX before the first paint, so the grid is
+        // never drawn with icons this APEX release cannot display
+        var synced = syncWithRuntime();
+
         applySize();
         renderChips();
         renderGrid();
@@ -534,14 +617,16 @@
         element.showModal();
         searchInput.focus();
 
-        // pick up icons from a Font APEX newer than the bundled catalog, then redraw if we
-        // actually found any. Deliberately after showModal so it never delays opening.
-        mergeRuntimeIcons().then( function ( changed ) {
-            if ( changed && element.open ) {
-                renderChips();
-                renderGrid();
-            }
-        } );
+        if ( !synced ) {
+            // the stylesheet was not readable synchronously - try to fetch it, and redraw if
+            // that tells us something. After showModal, so it never delays opening.
+            syncWithRuntimeAsync().then( function ( changed ) {
+                if ( changed && element.open ) {
+                    renderChips();
+                    renderGrid();
+                }
+            } );
+        }
     }
 
     ip.open = open;
@@ -662,9 +747,48 @@
             return out.toString();
         }
 
-        function setGridValue( regionId, rowId, column, value ) {
-            var widget = global.apex.region( regionId ).widget(),
-                model  = widget.interactiveGrid( "getViews", "grid" ).model,
+        /**
+         * Resolves the grid view and the record the clicked button belongs to.
+         *
+         * 2.0 found these by looking for "input.igiconpicker" next to the button and then
+         * slicing "_ig" off the id of the enclosing .a-IG. That input only exists in the
+         * markup the plug-in's PL/SQL renders; render() above emits input.ig-input-icon-picker
+         * instead, so for every row the grid draws on the client the lookup found nothing and
+         * apex.region("") returned null. apex.region.findClosest asks APEX directly and works
+         * for both.
+         *
+         * @return {Object|null} { view, rowId } or null when either cannot be determined
+         */
+        function gridContext( button ) {
+            var region = global.apex.region.findClosest( button ),
+                view,
+                rowId = $( button ).closest( "[data-id]" ).attr( "data-id" ),
+                records;
+
+            if ( !region || !region.widget ) {
+                return null;
+            }
+
+            view = region.widget().interactiveGrid( "getViews", "grid" );
+
+            if ( !view || !view.model ) {
+                return null;
+            }
+
+            if ( !rowId ) {
+                // single row view has no tr[data-id]; clicking a cell selects its record
+                records = view.getSelectedRecords ? view.getSelectedRecords() : null;
+
+                if ( records && records.length ) {
+                    rowId = view.model.getRecordId( records[ 0 ] );
+                }
+            }
+
+            return rowId ? { view: view, rowId: rowId } : null;
+        }
+
+        function setGridValue( context, column, value ) {
+            var model  = context.view.model,
                 fields = model.getOption( "fields" ),
                 field  = "";
 
@@ -674,7 +798,12 @@
                 }
             } );
 
-            model.setRecordValue( rowId, field, value );
+            if ( !field ) {
+                global.apex.debug.error( "Icon Picker: no grid field maps to column " + column );
+                return;
+            }
+
+            model.setRecordValue( context.rowId, field, value );
         }
 
         if ( !options.readOnly ) {
@@ -684,17 +813,20 @@
                 boundGridColumns[ itemId ] = true;
 
                 $( global.document ).on( "click", 'button#' + itemId + '_lov_btn.ig-button-icon-picker', function ( event ) {
-                    var button   = event.currentTarget,
-                        input$   = $( button ).parent().find( "input.igiconpicker" ).first(),
-                        rowId    = input$.closest( "tr" ).data( "id" ),
-                        region$  = input$.parents( ".a-IG" ).first(),
-                        regionId = ( region$.attr( "id" ) || "" ).slice( 0, -3 );
+                    var button  = event.currentTarget,
+                        context = gridContext( button );
+
+                    if ( !context ) {
+                        global.apex.debug.error(
+                            "Icon Picker: could not resolve the grid row for column " + itemId );
+                        return;
+                    }
 
                     open( {
                         trigger: button,
                         options: options,
                         select: function ( iconName ) {
-                            setGridValue( regionId, rowId, itemId, iconName );
+                            setGridValue( context, itemId, iconName );
                         }
                     } );
                 } );
