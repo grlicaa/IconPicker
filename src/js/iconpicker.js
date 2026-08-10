@@ -32,6 +32,7 @@
         cancelButton,
         activeTarget,                       // set while the dialog is open
         activeCategory  = ALL_CHIP,
+        activeKey       = "",               // identifies the item currently in the dialog
         returnFocusTo   = null,
         searchTimer     = null,
         syncState       = "pending",        // pending | done, see syncWithRuntime
@@ -42,6 +43,19 @@
 
     // interactive grid columns whose delegated click handler is already bound
     var boundGridColumns = Object.create( null );
+
+    /*
+     * The tab each item was last left on, keyed by item name (an Interactive Grid column
+     * counts as one item, so every row of it shares an entry).
+     *
+     * The dialog is a page-wide singleton, so anything left in activeCategory belongs to
+     * whichever item opened it last. Keeping the selection here instead means opening a
+     * second item cannot inherit the first one's tab - which was especially bad for an item
+     * with the tabs switched off, since it had no visible control to clear the filter with.
+     *
+     * Deliberately not persisted: this is a convenience within one page, not a setting.
+     */
+    var tabByItem = Object.create( null );
 
     // ------------------------------------------------------------------
     // small helpers
@@ -527,6 +541,9 @@
     function normaliseActiveCategory() {
         if ( activeCategory !== ALL_CHIP && !activeIcons[ activeCategory ] ) {
             activeCategory = ALL_CHIP;
+            // forget it too, or the dead category comes back on the next open and gets
+            // silently reset all over again
+            delete tabByItem[ activeKey ];
         }
     }
 
@@ -693,6 +710,7 @@
 
             if ( chip ) {
                 activeCategory = chip.getAttribute( "data-category" );
+                tabByItem[ activeKey ] = activeCategory;
                 renderChips();
                 renderGrid();
             }
@@ -751,6 +769,9 @@
      * @param {Object} target          what the picked icon should be applied to
      * @param {Object} target.options  plug-in attributes for the triggering item
      * @param {Function} target.select called with the chosen class name
+     * @param {string} [target.key]    identifies the item, so its category tab is remembered
+     *        separately from every other picker on the page. Omitting it is allowed - all
+     *        keyless callers then share one bucket.
      * @param {Element} [target.trigger] element focus returns to on close. Passed in rather
      *        than read from document.activeElement, which is not the button on every browser
      *        (Safari does not focus a button on click) nor on a programmatic click.
@@ -766,6 +787,13 @@
         cancelButton.textContent = options.closeLabel || "Cancel";
         searchInput.placeholder  = options.placeholder || "";
         searchInput.value        = "";
+
+        // Restore this item's own tab. An item with the tabs hidden always starts on All:
+        // it has no way to change the filter, so it must never carry one.
+        activeKey      = target.key || "";
+        activeCategory = options.showCategories === false
+            ? ALL_CHIP
+            : ( tabByItem[ activeKey ] || ALL_CHIP );
 
         element.querySelector( 'label[for="' + DIALOG_ID + 'Small"]' ).textContent = options.smallLabel || "Small";
         element.querySelector( 'label[for="' + DIALOG_ID + 'Large"]' ).textContent = options.largeLabel || "Large";
@@ -849,6 +877,7 @@
 
         button.addEventListener( "click", function () {
             open( {
+                key: itemName,
                 trigger: button,
                 options: options,
                 select: function ( iconName ) {
@@ -996,6 +1025,7 @@
                     }
 
                     open( {
+                        key: itemId,
                         trigger: button,
                         options: options,
                         select: function ( iconName ) {
