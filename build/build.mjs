@@ -153,6 +153,20 @@ function attributeBlock( attribute ) {
     }
 
     lines.push( ');' );
+
+    // A SELECT LIST attribute carries its options as separate rows. Display sequences go
+    // 10, 20, 30 the way an APEX generated export writes them.
+    ( attribute.values || [] ).forEach( ( value, index ) => {
+        lines.push(
+            'wwv_flow_imp_shared.create_plugin_attr_value(',
+            ` p_id=>wwv_flow_imp.id(${ value.id })`,
+            `,p_plugin_attribute_id=>wwv_flow_imp.id(${ attribute.id })`,
+            `,p_display_sequence=>${ ( index + 1 ) * 10 }`,
+            `,p_display_value=>${ q( value.display ) }`,
+            `,p_return_value=>${ q( value.return ) }`,
+            ');' );
+    } );
+
     return lines.join( '\n' );
 }
 

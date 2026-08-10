@@ -28,6 +28,23 @@ begin
     return case when nvl( p_value, p_default ) = 'Y' then 'true' else 'false' end;
 end bool_attr;
 
+-- Resolves an item level override against the application wide setting. The item attribute
+-- is a select list of DEFAULT / Y / N; DEFAULT (and null, for items saved before the
+-- attribute existed) means "follow the application".
+function override_attr (
+    p_item_value   in varchar2,
+    p_plugin_value in varchar2,
+    p_default      in varchar2 )
+    return varchar2
+is
+begin
+    if p_item_value is null or p_item_value = 'DEFAULT' then
+        return nvl( p_plugin_value, p_default );
+    end if;
+
+    return p_item_value;
+end override_attr;
+
 -- Dialog width/height are free text attributes, so anything non-numeric falls back to the
 -- default rather than being pasted straight into the generated JavaScript.
 function number_attr (
@@ -54,10 +71,11 @@ is
     l_search_placeholder  lt_string := p_plugin.attribute_03;
     l_small_label         lt_string := p_plugin.attribute_04;
     l_large_label         lt_string := p_plugin.attribute_05;
-    l_show_icon_labels    lt_string := p_plugin.attribute_06;
+    l_app_icon_labels     lt_string := p_plugin.attribute_06;
     -- attribute_07 was "Use Widget:IconList" in 2.0. The jQuery UI iconList widget no
     -- longer ships with APEX, so the attribute is gone and the slot is left unused.
-    l_show_categories     lt_string := p_plugin.attribute_08;
+    l_app_categories      lt_string := p_plugin.attribute_08;
+    l_app_blacklist       gt_string := p_plugin.attribute_09;
 
     -- Component level attributes
     l_dialog_title        lt_string := nvl( p_item.attribute_01, 'Icon Picker' );
@@ -67,6 +85,16 @@ is
     l_ig_default_icon     lt_string := nvl( p_item.attribute_05, 'fa-navicon' );
     l_ig_only_icon        lt_string := nvl( p_item.attribute_06, 'N' );
     l_ig_read_only        lt_string := nvl( p_item.attribute_07, 'N' );
+    l_item_blacklist      gt_string := p_item.attribute_10;
+
+    -- Resolved: the item wins unless it says "use application default"
+    l_show_categories     lt_string := override_attr( p_item.attribute_08, l_app_categories,  'Y' );
+    l_show_icon_labels    lt_string := override_attr( p_item.attribute_09, l_app_icon_labels, 'N' );
+
+    -- Both lists always apply, so they are simply concatenated and split on the client
+    l_blacklist           gt_string := rtrim( ltrim(
+                              nvl( l_app_blacklist, '' ) || ',' || nvl( l_item_blacklist, '' ),
+                              ',' ), ',' );
 
     l_component_type      lt_string := p_item.component_type_id;
     l_is_grid             boolean   := p_item.component_type_id = apex_component.c_comp_type_ig_column;
@@ -95,7 +123,8 @@ begin
         ',"smallLabel":'     || apex_escape.js_literal( l_small_label,        '"' ) ||
         ',"largeLabel":'     || apex_escape.js_literal( l_large_label,        '"' ) ||
         ',"defaultIcon":'    || apex_escape.js_literal( l_ig_default_icon,    '"' ) ||
-        ',"showLabels":'     || bool_attr( l_show_icon_labels, 'Y' ) ||
+        ',"blacklist":'      || apex_escape.js_literal( l_blacklist,          '"' ) ||
+        ',"showLabels":'     || bool_attr( l_show_icon_labels, 'N' ) ||
         ',"showCategories":' || bool_attr( l_show_categories,  'Y' ) ||
         ',"resizable":'      || bool_attr( l_dialog_resizable, 'Y' ) ||
         ',"width":'          || l_dialog_width ||

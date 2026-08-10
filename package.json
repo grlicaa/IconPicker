@@ -12,6 +12,7 @@
   },
   "scripts": {
     "icons": "node tools/gen-icons.mjs",
+    "messages": "node tools/gen-messages.mjs",
     "build": "node build/build.mjs"
   },
   "devDependencies": {

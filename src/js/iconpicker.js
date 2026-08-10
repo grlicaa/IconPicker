@@ -34,7 +34,11 @@
         activeCategory  = ALL_CHIP,
         returnFocusTo   = null,
         searchTimer     = null,
-        syncState       = "pending";        // pending | done, see syncWithRuntime
+        syncState       = "pending",        // pending | done, see syncWithRuntime
+
+        // ip.icons as the item currently in the dialog may see it, i.e. minus its blacklist.
+        // Rebuilt on every open; never a mutation of ip.icons itself.
+        activeIcons     = {};
 
     // interactive grid columns whose delegated click handler is already bound
     var boundGridColumns = Object.create( null );
@@ -68,12 +72,39 @@
         }
     }
 
+    // ------------------------------------------------------------------
+    // translation
+    //
+    // Every user visible string the dialog builds itself goes through msg(). Create an APEX
+    // Text Message with the given key and "Used in JavaScript" set to Yes and it is used;
+    // create nothing and the English fallback stands, so an existing application sees no
+    // change. The dialog title, cancel text, placeholder and size labels are not here - they
+    // are already translatable plug-in attributes.
+    //
+    // getMessage plus a local %0 replacement rather than apex.lang.formatMessage, because
+    // formatMessage HTML-escapes its substitutions and everything here is escaped again by
+    // escapeHtml() at the point of insertion. One escaping step, not two.
+    // ------------------------------------------------------------------
+
+    function msg( key, fallback, subst ) {
+        var lang = global.apex && global.apex.lang,
+            text = fallback;
+
+        if ( lang && lang.hasMessage && lang.hasMessage( key ) ) {
+            text = lang.getMessage( key );
+        }
+
+        return subst === undefined ? text : text.replace( /%0/g, subst );
+    }
+
     // category keys are rendered lower case and capitalised by CSS, which turns the one
     // acronym in the catalog into "Ai"
     var CATEGORY_LABELS = { AI: "AI" };
 
     function categoryLabel( category ) {
-        return CATEGORY_LABELS[ category ] || category.replace( /_/g, " " ).toLowerCase();
+        return msg(
+            "IP.CATEGORY." + category,
+            CATEGORY_LABELS[ category ] || category.replace( /_/g, " " ).toLowerCase() );
     }
 
     // ------------------------------------------------------------------
@@ -81,15 +112,19 @@
     // ------------------------------------------------------------------
 
     /**
-     * Every icon in the bundled catalog, de-duplicated. Categories overlap - "NEW" repeats
-     * icons that also live in their own category - so search must run over a flat unique set.
+     * Every icon in a catalog, de-duplicated. Categories overlap - "NEW" repeats icons that
+     * also live in their own category - so search must run over a flat unique set.
+     *
+     * Takes the catalog rather than reading ip.icons, because the runtime reconcile has to
+     * work against the full catalog while everything the user sees works against the
+     * blacklisted view.
      */
-    function flatIcons() {
+    function flatIcons( catalog ) {
         var seen = Object.create( null ),
             flat = [];
 
-        Object.keys( ip.icons ).forEach( function ( category ) {
-            ip.icons[ category ].forEach( function ( icon ) {
+        Object.keys( catalog ).forEach( function ( category ) {
+            catalog[ category ].forEach( function ( icon ) {
                 if ( !seen[ icon.name ] ) {
                     seen[ icon.name ] = true;
                     flat.push( icon );
@@ -98,6 +133,101 @@
         } );
 
         return flat;
+    }
+
+    // ------------------------------------------------------------------
+    // blacklist
+    //
+    // The application list and the item's own list are concatenated by the PL/SQL and split
+    // here. Applied as a per-open view over ip.icons and never by mutating it: the catalog is
+    // module state shared by every picker on the page, so mutating it would leak one item's
+    // blacklist onto all the others.
+    // ------------------------------------------------------------------
+
+    var blacklistCache = Object.create( null );
+
+    /**
+     * @param {string} text  comma or newline separated icon names, category names and
+     *                       wildcard patterns
+     */
+    function parseBlacklist( text ) {
+        var parsed = { names: Object.create( null ), categories: Object.create( null ),
+                       patterns: [], empty: true };
+
+        if ( !text ) {
+            return parsed;
+        }
+
+        String( text ).split( /[,\n\r]+/ ).forEach( function ( raw ) {
+            var entry = raw.trim();
+
+            if ( !entry ) {
+                return;
+            }
+            parsed.empty = false;
+
+            if ( entry.indexOf( "*" ) >= 0 ) {
+                // "fa-flag-*" -> /^fa-flag-.*$/i, with everything else taken literally
+                parsed.patterns.push( new RegExp(
+                    "^" + entry.replace( /[.+?^${}()|[\]\\]/g, "\\$&" ).replace( /\*/g, ".*" ) + "$",
+                    "i" ) );
+                return;
+            }
+
+            // a category, spelled either COUNTRY_FLAG or "Country Flag"
+            parsed.categories[ entry.toUpperCase().replace( /\s+/g, "_" ) ] = true;
+
+            // an icon name, with the fa- prefix optional so "bomb" finds "fa-bomb"
+            parsed.names[ entry.toLowerCase() ] = true;
+            if ( entry.toLowerCase().indexOf( "fa-" ) !== 0 ) {
+                parsed.names[ "fa-" + entry.toLowerCase() ] = true;
+            }
+        } );
+
+        return parsed;
+    }
+
+    function blacklistFor( text ) {
+        var key = text || "";
+
+        if ( !blacklistCache[ key ] ) {
+            blacklistCache[ key ] = parseBlacklist( key );
+        }
+        return blacklistCache[ key ];
+    }
+
+    function isBlacklisted( name, category, list ) {
+        if ( list.categories[ category ] || list.names[ name.toLowerCase() ] ) {
+            return true;
+        }
+        return list.patterns.some( function ( pattern ) {
+            return pattern.test( name );
+        } );
+    }
+
+    /**
+     * The catalog as this item should see it: ip.icons minus the blacklist, with any category
+     * left empty dropped so it disappears from the tabs as well as the grid.
+     */
+    function buildActiveCatalog( blacklistText ) {
+        var list = blacklistFor( blacklistText ),
+            view = Object.create( null );
+
+        if ( list.empty ) {
+            return ip.icons;
+        }
+
+        Object.keys( ip.icons ).forEach( function ( category ) {
+            var kept = ip.icons[ category ].filter( function ( icon ) {
+                return !isBlacklisted( icon.name, category, list );
+            } );
+
+            if ( kept.length ) {
+                view[ category ] = kept;
+            }
+        } );
+
+        return view;
     }
 
     // ------------------------------------------------------------------
@@ -316,7 +446,7 @@
         var ranked = [],
             score  = Object.create( null );
 
-        flatIcons().forEach( function ( icon ) {
+        flatIcons( activeIcons ).forEach( function ( icon ) {
             var name    = icon.name.toUpperCase().slice( 3 ),   // drop the "fa-" prefix
                 filters = icon.filters ? icon.filters.toUpperCase() : "",
                 parts,
@@ -395,13 +525,13 @@
      * before every render, not only when the chips themselves are redrawn.
      */
     function normaliseActiveCategory() {
-        if ( activeCategory !== ALL_CHIP && !ip.icons[ activeCategory ] ) {
+        if ( activeCategory !== ALL_CHIP && !activeIcons[ activeCategory ] ) {
             activeCategory = ALL_CHIP;
         }
     }
 
     function visibleCategories() {
-        var all = Object.keys( ip.icons );
+        var all = Object.keys( activeIcons );
 
         return activeCategory === ALL_CHIP
             ? all
@@ -419,11 +549,13 @@
 
         if ( key === "" ) {
             visibleCategories().forEach( function ( category ) {
-                var icons = ip.icons[ category ].slice().sort( function ( a, b ) {
+                var icons = activeIcons[ category ].slice().sort( function ( a, b ) {
                     return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
                 } );
 
-                html += categoryHtml( categoryLabel( category ) + " Icons", icons, showLabel );
+                html += categoryHtml(
+                    msg( "IP.CATEGORY_HEADING", "%0 Icons", categoryLabel( category ) ),
+                    icons, showLabel );
             } );
         } else {
             var pool = search( key );
@@ -431,7 +563,7 @@
             if ( activeCategory !== ALL_CHIP ) {
                 var inCategory = Object.create( null );
 
-                ip.icons[ activeCategory ].forEach( function ( icon ) {
+                activeIcons[ activeCategory ].forEach( function ( icon ) {
                     inCategory[ icon.name ] = true;
                 } );
                 pool = pool.filter( function ( icon ) {
@@ -440,7 +572,9 @@
             }
 
             html = categoryHtml(
-                pool.length ? pool.length + " Results" : "No results",
+                pool.length
+                    ? msg( "IP.RESULTS", "%0 Results", pool.length )
+                    : msg( "IP.NO_RESULTS", "No results" ),
                 pool,
                 showLabel
             );
@@ -451,7 +585,7 @@
     }
 
     function renderChips() {
-        var categories = Object.keys( ip.icons ),
+        var categories = Object.keys( activeIcons ),
             html;
 
         if ( !activeTarget || activeTarget.options.showCategories === false ) {
@@ -464,7 +598,7 @@
 
         html = [ ALL_CHIP ].concat( categories ).map( function ( category ) {
             var isAll   = category === ALL_CHIP,
-                label   = isAll ? ( activeTarget.options.allLabel || "All" ) : categoryLabel( category ),
+                label   = isAll ? msg( "IP.ALL", "All" ) : categoryLabel( category ),
                 current = category === activeCategory;
 
             return '<button type="button" class="a-IconPicker-chip'
@@ -494,24 +628,27 @@
                     + '<h2 class="a-IconPicker-title"></h2>'
                     + '<button type="submit" class="a-IconPicker-dismiss" value="cancel">'
                         + '<span class="fa fa-times" aria-hidden="true"></span>'
-                        + '<span class="u-vh">Close</span>'
+                        + '<span class="u-vh">' + escapeHtml( msg( "IP.CLOSE", "Close" ) ) + "</span>"
                     + "</button>"
                 + "</div>"
                 + '<div class="a-IconPicker-toolbar">'
                     + '<div class="a-IconPicker-search">'
                         + '<span class="a-IconPicker-searchIcon fa fa-search" aria-hidden="true"></span>'
-                        + '<label class="u-vh" for="' + DIALOG_ID + 'Search">Search</label>'
+                        + '<label class="u-vh" for="' + DIALOG_ID + 'Search">'
+                            + escapeHtml( msg( "IP.SEARCH", "Search" ) ) + "</label>"
                         + '<input id="' + DIALOG_ID + 'Search" class="a-IconPicker-searchInput" type="search"'
                             + ' autocomplete="off" aria-controls="' + DIALOG_ID + 'Grid" />'
                     + "</div>"
-                    + '<div class="a-IconPicker-size" role="group" aria-label="Icon size">'
+                    + '<div class="a-IconPicker-size" role="group" aria-label="'
+                        + escapeHtml( msg( "IP.ICON_SIZE", "Icon size" ) ) + '">'
                         + '<input type="radio" id="' + DIALOG_ID + 'Small" name="' + DIALOG_ID + 'Size" value="' + SIZE_SMALL + '" />'
                         + '<label for="' + DIALOG_ID + 'Small"></label>'
                         + '<input type="radio" id="' + DIALOG_ID + 'Large" name="' + DIALOG_ID + 'Size" value="' + SIZE_LARGE + '" />'
                         + '<label for="' + DIALOG_ID + 'Large"></label>'
                     + "</div>"
                 + "</div>"
-                + '<div class="a-IconPicker-chips" role="group" aria-label="Icon categories" hidden></div>'
+                + '<div class="a-IconPicker-chips" role="group" aria-label="'
+                    + escapeHtml( msg( "IP.CATEGORIES", "Icon categories" ) ) + '" hidden></div>'
                 + '<div id="' + DIALOG_ID + 'Grid" class="a-IconPicker-grid" role="region" aria-live="polite"></div>'
                 + '<div class="a-IconPicker-footer">'
                     // no t-Button here: plug-in CSS loads before the theme, so sharing a
@@ -526,7 +663,11 @@
     }
 
     function dialogElement() {
-        if ( dialog$ ) {
+        // Rebuild when the cached dialog is no longer in the document. One page can drop it
+        // under us - a partial page refresh that replaces the body, a modal page closing -
+        // and showModal() on a detached element throws InvalidStateError, which would break
+        // the picker for the rest of the page's life.
+        if ( dialog$ && global.document.contains( dialog$ ) ) {
             return dialog$;
         }
 
@@ -637,6 +778,10 @@
         // never drawn with icons this APEX release cannot display
         var synced = syncWithRuntime();
 
+        // then subtract this item's blacklist. Order matters: the reconcile owns ip.icons,
+        // the blacklist is only ever a view on top of it.
+        activeIcons = buildActiveCatalog( options.blacklist );
+
         applySize();
         renderChips();
         renderGrid();
@@ -649,6 +794,7 @@
             // that tells us something. After showModal, so it never delays opening.
             syncWithRuntimeAsync().then( function ( changed ) {
                 if ( changed && element.open ) {
+                    activeIcons = buildActiveCatalog( options.blacklist );
                     renderChips();
                     renderGrid();
                 }

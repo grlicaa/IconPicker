@@ -38,8 +38,15 @@ Running APEX 22.1 to 23.1? Import `item_type_plugin_si_abakus_iconpicker_apex_22
   know about under `OTHER`, and removes any category left empty. On APEX 23.2 the four new
   categories above disappear instead of rendering as blank tiles. See
   [The picker only offers icons your APEX release actually has](#the-picker-only-offers-icons-your-apex-release-actually-has).
-- **Category filter chips** above the grid, so a 1,500 icon list narrows to one category
-  in a click. Chips and search compose. (ToDo item from 2.0.)
+- **Category tabs** above the grid, so a 1,500 icon list narrows to one category in a click.
+  Tabs and search compose. (ToDo item from 2.0.)
+- **Blacklist icons or whole categories**, at application level, at item level, or both — the
+  two lists are combined. Accepts icon names, category names and wildcards. A stored value
+  that is blacklisted still renders; it simply cannot be picked again.
+- **Show Category Tabs and Show Icon Labels can be set per item**, not only per application.
+  `Show Icon Labels` now defaults to **No**.
+- **The whole dialog is translatable** through APEX Text Messages, category names included,
+  with a generated starter script.
 - **No jQuery UI.** The dialog is a native `<dialog>`. jQuery UI is deprecated in APEX and
   Oracle asks plug-in authors to drop it.
 - **Removed the "Use Widget:IconList" attribute.** `$.fn.iconList` no longer exists in
@@ -100,8 +107,9 @@ Running APEX 22.1 to 23.1? Import `item_type_plugin_si_abakus_iconpicker_apex_22
 | Dialog search field placeholder | Search icons... | Translatable |
 | SMALL icons label | Small | Translatable |
 | LARGE icons label | Large | Translatable |
-| Show icons labels | Yes | Class name under each icon |
-| Show category filter | Yes | **New in 3.0.** Category chips above the grid |
+| Show Icon Labels | **No** | Print the class name under each icon, e.g. `fa-user` |
+| Show Category Tabs | Yes | Category tabs above the grid |
+| Blacklist Icons and Categories | — | Icons to hide, see below |
 
 ### Component level
 
@@ -114,12 +122,67 @@ Running APEX 22.1 to 23.1? Import `item_type_plugin_si_abakus_iconpicker_apex_22
 | IG default icon | fa-navicon | Interactive Grid only |
 | IG only icon | No | Interactive Grid only |
 | IG Read Only | No | Interactive Grid only |
+| Show Category Tabs | Use application default | Overrides the application setting for this item |
+| Show Icon Labels | Use application default | Overrides the application setting for this item |
+| Blacklist Icons and Categories | — | Applied **on top of** the application list |
+
+`Show Category Tabs` and `Show Icon Labels` exist in both scopes. The application attribute
+is the default; each page item or Interactive Grid column can override it, or leave it on
+*Use application default* to follow the application.
+
+### Hiding icons
+
+`Blacklist Icons and Categories` takes one entry per line, or a comma separated list:
+
+```
+fa-bomb, fa-skull        an icon class name
+COUNTRY_FLAG             a whole category, as named on its tab
+Country Flag             the same - spaces and letter case are ignored
+fa-flag-*                a wildcard, hides every icon that matches
+bomb                     the fa- prefix is optional
+```
+
+The application list and the item's list are **both** applied — an item cannot re-enable
+something the application has blacklisted. A category left empty disappears from the tabs as
+well as the grid, and blacklisted icons are excluded from search, not merely from the grid.
+
+An icon already stored in a row **keeps rendering normally**. Blacklisting only removes it
+from the picker, so it cannot be chosen again; it never rewrites existing data.
+
+## Translation
+
+The dialog title, cancel button, search placeholder and the Small / Large labels are plug-in
+attributes and are translated the way APEX translates any attribute.
+
+Everything else the dialog builds itself — category names, the result count, the accessible
+labels — is looked up as an APEX **Text Message**. Create the message with **Used in
+JavaScript** set to **Yes**; without that flag the message exists but the picker cannot see
+it. Create none and nothing changes: every string falls back to the English below.
+
+| Message | Used for | Falls back to |
+|---|---|---|
+| `IP.CATEGORY.<CATEGORY>` | A category tab and its heading, e.g. `IP.CATEGORY.WEB_APPLICATION` | The category name in English |
+| `IP.ALL` | The "All" tab | `All` |
+| `IP.CATEGORY_HEADING` | Heading above a category, `%0` is the name | `%0 Icons` |
+| `IP.RESULTS` | Search result count, `%0` is the number | `%0 Results` |
+| `IP.NO_RESULTS` | Search matched nothing | `No results` |
+| `IP.SEARCH` | Hidden label on the search field | `Search` |
+| `IP.CLOSE` | Hidden label on the close button | `Close` |
+| `IP.ICON_SIZE` | Group label on the Small / Large toggle | `Icon size` |
+| `IP.CATEGORIES` | Group label on the tab row | `Icon categories` |
+
+`docs/text-messages/IP_messages_en.sql` creates all of them in English, including one
+`IP.CATEGORY.*` line per category. Set the application id at the top and run it, then copy the
+file per language, change `l_language` and translate the texts — keeping the `%0` placeholders.
+Regenerate it with `npm run messages`; the category list comes from the icon catalog, so it
+cannot drift.
 
 ## Building from source
 
 ```
 npm install
 npm run icons      # regenerate src/js/icons.js from the harvested Font APEX catalog
+npm run messages   # regenerate docs/text-messages/IP_messages_en.sql
 npm run build      # minify src/, then generate plug-in/..._apex_232.sql
 ```
 
