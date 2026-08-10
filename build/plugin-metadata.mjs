@@ -49,7 +49,12 @@ const BLACKLIST_HELP = [
     'A category that ends up empty disappears from the tabs as well as the grid.<br><br>',
     'An icon already stored in a row <strong>keeps rendering normally</strong> - blacklisting ',
     'only removes it from the picker, so it cannot be chosen again. Existing data is never ',
-    'changed.<br>'
+    'changed.<br><br>',
+    '<strong>Category names you can use:</strong><br>',
+    // build.mjs replaces this from the icon catalog, so it cannot go stale
+    '%CATEGORIES%<br><br>',
+    'Icon names are the Font APEX class names - open the picker and turn on ',
+    '<strong>Show Icon Labels</strong> to read them, or hover any icon for its tooltip.<br>'
 ];
 
 /*
@@ -137,7 +142,15 @@ export const ATTRIBUTES = [
             '<strong>IP.CATEGORY.&lt;CATEGORY&gt;</strong> - for example ',
             '<strong>IP.CATEGORY.WEB_APPLICATION</strong> or <strong>IP.CATEGORY.NEW</strong> - ',
             'with <strong>Used in JavaScript</strong> set to Yes. Untranslated categories keep ',
-            'their English name.'
+            'their English name.<br><br>',
+            '<strong>Categories in this build:</strong><br>',
+            // build.mjs replaces this from the icon catalog, so it cannot go stale
+            '%CATEGORIES%<br><br>',
+            'Your APEX release may have fewer: the picker checks its Font APEX stylesheet on ',
+            'first open and drops whatever that release does not ship.<br><br>',
+            'The script <strong>docs/text-messages/IP_messages_en.sql</strong> in the plug-in ',
+            'repository creates every message, including one line per category, ready to ',
+            'translate.'
         ]
     },
     {

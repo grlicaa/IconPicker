@@ -127,6 +127,26 @@ function fileBlock( file, buffer ) {
 // plug-in definition
 // ---------------------------------------------------------------------------
 
+/**
+ * Category keys, straight from the icon catalog. Attribute help quotes the list so a
+ * developer can see what is blacklistable without opening icons.js, and taking it from the
+ * catalog means a Font APEX bump cannot leave the help lying.
+ */
+function catalogCategories() {
+    const sandbox = {};
+
+    new Function( 'window', readFileSync( join( ROOT, 'src', 'js', 'icons.js' ), 'utf8' ) )( sandbox );
+
+    return Object.keys( sandbox.abakusIconPicker.icons );
+}
+
+const CATEGORIES = catalogCategories();
+
+/** Fills %CATEGORIES% in help text with the live list. */
+function expandHelp( lines ) {
+    return lines.map( line => line.replace( /%CATEGORIES%/g, CATEGORIES.join( ', ' ) ) );
+}
+
 function attributeBlock( attribute ) {
     const lines = [
         'wwv_flow_imp_shared.create_plugin_attribute(',
@@ -149,7 +169,7 @@ function attributeBlock( attribute ) {
     lines.push( `,p_is_translatable=>${ attribute.translatable ? 'true' : 'false' }` );
 
     if ( attribute.help ) {
-        lines.push( `,p_help_text=>${ textValue( attribute.help ) }` );
+        lines.push( `,p_help_text=>${ textValue( expandHelp( attribute.help ) ) }` );
     }
 
     lines.push( ');' );
@@ -331,6 +351,19 @@ writeFileSync( TARGET, sql );
 
 console.log( 'Verifying' );
 verify( sql, buffers );
+
+// The README documents the category names a developer can blacklist or translate. It is
+// written by hand, so the build checks it still matches the catalog rather than trusting it.
+const readme  = readFileSync( join( ROOT, 'README.md' ), 'utf8' );
+const undocumented = CATEGORIES.filter( category => !readme.includes( '`' + category + '`' ) );
+
+if ( undocumented.length ) {
+    throw new Error(
+        `README.md does not document these categories: ${ undocumented.join( ', ' ) }.\n`
+        + '  Add them to the category table, or the blacklist and translation docs will be wrong.' );
+}
+
+console.log( `  README documents all ${ CATEGORIES.length } categories` );
 
 console.log( `\nWrote ${ TARGET.replace( ROOT + '\\', '' ).replace( ROOT + '/', '' ) } `
     + `(${ sql.length } bytes, ${ readdirSync( DIST ).length } embedded files)` );

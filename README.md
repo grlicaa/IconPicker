@@ -149,6 +149,55 @@ well as the grid, and blacklisted icons are excluded from search, not merely fro
 An icon already stored in a row **keeps rendering normally**. Blacklisting only removes it
 from the picker, so it cannot be chosen again; it never rewrites existing data.
 
+Icon names are the Font APEX class names. To read them, turn on `Show Icon Labels`, or hover
+any icon in the picker for its tooltip.
+
+### Category names
+
+These are the categories in this build (Font APEX 2.5.1). Use either column when
+blacklisting — `Country Flag` and `COUNTRY_FLAG` both work. The right-hand column is also
+what goes in the `IP.CATEGORY.*` message key when translating.
+
+| Shown on the tab | Name to use | Icons |
+|---|---|---|
+| New | `NEW` | 53 |
+| Accessibility | `ACCESSIBILITY` | 15 |
+| AI | `AI` | 30 |
+| Business | `BUSINESS` | 30 |
+| Calendar | `CALENDAR` | 20 |
+| Chart | `CHART` | 45 |
+| Construction | `CONSTRUCTION` | 50 |
+| Country Flag | `COUNTRY_FLAG` | 253 |
+| Currency | `CURRENCY` | 17 |
+| Directional | `DIRECTIONAL` | 93 |
+| Emoji | `EMOJI` | 54 |
+| File Type | `FILE_TYPE` | 14 |
+| Form Control | `FORM_CONTROL` | 14 |
+| Gender | `GENDER` | 13 |
+| Hand | `HAND` | 11 |
+| Maps | `MAPS` | 34 |
+| Medical | `MEDICAL` | 26 |
+| Numbers | `NUMBERS` | 20 |
+| Payment | `PAYMENT` | 3 |
+| Spinner | `SPINNER` | 4 |
+| Text Editor | `TEXT_EDITOR` | 60 |
+| Transportation | `TRANSPORTATION` | 13 |
+| Video Player | `VIDEO_PLAYER` | 19 |
+| Web Application | `WEB_APPLICATION` | 703 |
+
+`NEW` repeats icons that also live in their own category, which is why the counts add up to
+more than the 1,541 unique icons.
+
+Two more can appear at run time:
+
+- **`OTHER`** — icons your APEX release ships that this build does not know about.
+- Nothing else is invented; categories your release does not have are removed instead, so on
+  APEX 23.2 the picker shows 20 of the 24 above. See
+  [The picker only offers icons your APEX release actually has](#the-picker-only-offers-icons-your-apex-release-actually-has).
+
+The same list is printed in the help text of the blacklist attribute inside Page Designer,
+generated from the icon catalog at build time so the two cannot disagree.
+
 ## Translation
 
 The dialog title, cancel button, search placeholder and the Small / Large labels are plug-in
@@ -161,7 +210,7 @@ it. Create none and nothing changes: every string falls back to the English belo
 
 | Message | Used for | Falls back to |
 |---|---|---|
-| `IP.CATEGORY.<CATEGORY>` | A category tab and its heading, e.g. `IP.CATEGORY.WEB_APPLICATION` | The category name in English |
+| `IP.CATEGORY.<CATEGORY>` | A category tab and its heading. One per category — see [Category names](#category-names) for the 24 keys, e.g. `IP.CATEGORY.WEB_APPLICATION`, plus `IP.CATEGORY.OTHER` | The category name in English |
 | `IP.ALL` | The "All" tab | `All` |
 | `IP.CATEGORY_HEADING` | Heading above a category, `%0` is the name | `%0 Icons` |
 | `IP.RESULTS` | Search result count, `%0` is the number | `%0 Results` |
@@ -171,11 +220,17 @@ it. Create none and nothing changes: every string falls back to the English belo
 | `IP.ICON_SIZE` | Group label on the Small / Large toggle | `Icon size` |
 | `IP.CATEGORIES` | Group label on the tab row | `Icon categories` |
 
-`docs/text-messages/IP_messages_en.sql` creates all of them in English, including one
-`IP.CATEGORY.*` line per category. Set the application id at the top and run it, then copy the
-file per language, change `l_language` and translate the texts — keeping the `%0` placeholders.
-Regenerate it with `npm run messages`; the category list comes from the icon catalog, so it
-cannot drift.
+**The full list of messages, ready to run, is
+[`docs/text-messages/IP_messages_en.sql`](docs/text-messages/IP_messages_en.sql)** — all 33 of
+them in English (8 interface strings, 24 categories, plus `IP.CATEGORY.OTHER`), each already
+flagged `p_used_in_javascript => true`. It is the easiest way to see every key in one place.
+
+To use it: set the application id at the top and run it against your parsing schema. To
+translate: copy the file per language, change `l_language` to the IANA code, translate the
+texts and keep the `%0` placeholders.
+
+Regenerate it with `npm run messages`; the `IP.CATEGORY.*` lines are read from the icon
+catalog, so the list cannot drift from the picker.
 
 ## Building from source
 

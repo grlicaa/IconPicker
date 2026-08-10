@@ -426,7 +426,14 @@ wwv_flow_imp_shared.create_plugin_attribute(
 '<strong>IP.CATEGORY.&lt;CATEGORY&gt;</strong> - for example ',
 '<strong>IP.CATEGORY.WEB_APPLICATION</strong> or <strong>IP.CATEGORY.NEW</strong> - ',
 'with <strong>Used in JavaScript</strong> set to Yes. Untranslated categories keep ',
-'their English name.'))
+'their English name.<br><br>',
+'<strong>Categories in this build:</strong><br>',
+'NEW, ACCESSIBILITY, AI, BUSINESS, CALENDAR, CHART, CONSTRUCTION, COUNTRY_FLAG, CURRENCY, DIRECTIONAL, EMOJI, FILE_TYPE, FORM_CONTROL, GENDER, HAND, MAPS, MEDICAL, NUMBERS, PAYMENT, SPINNER, TEXT_EDITOR, TRANSPORTATION, VIDEO_PLAYER, WEB_APPLICATION<br><br>',
+'Your APEX release may have fewer: the picker checks its Font APEX stylesheet on ',
+'first open and drops whatever that release does not ship.<br><br>',
+'The script <strong>docs/text-messages/IP_messages_en.sql</strong> in the plug-in ',
+'repository creates every message, including one line per category, ready to ',
+'translate.'))
 );
 wwv_flow_imp_shared.create_plugin_attribute(
  p_id=>wwv_flow_imp.id(208817364821553002)
@@ -453,7 +460,11 @@ wwv_flow_imp_shared.create_plugin_attribute(
 'A category that ends up empty disappears from the tabs as well as the grid.<br><br>',
 'An icon already stored in a row <strong>keeps rendering normally</strong> - blacklisting ',
 'only removes it from the picker, so it cannot be chosen again. Existing data is never ',
-'changed.<br>',
+'changed.<br><br>',
+'<strong>Category names you can use:</strong><br>',
+'NEW, ACCESSIBILITY, AI, BUSINESS, CALENDAR, CHART, CONSTRUCTION, COUNTRY_FLAG, CURRENCY, DIRECTIONAL, EMOJI, FILE_TYPE, FORM_CONTROL, GENDER, HAND, MAPS, MEDICAL, NUMBERS, PAYMENT, SPINNER, TEXT_EDITOR, TRANSPORTATION, VIDEO_PLAYER, WEB_APPLICATION<br><br>',
+'Icon names are the Font APEX class names - open the picker and turn on ',
+'<strong>Show Icon Labels</strong> to read them, or hover any icon for its tooltip.<br>',
 '<br>',
 'This is the application wide list. It is combined with the list on each page item ',
 'or Interactive Grid column - <strong>both lists always apply</strong>.'))
@@ -683,7 +694,11 @@ wwv_flow_imp_shared.create_plugin_attribute(
 'A category that ends up empty disappears from the tabs as well as the grid.<br><br>',
 'An icon already stored in a row <strong>keeps rendering normally</strong> - blacklisting ',
 'only removes it from the picker, so it cannot be chosen again. Existing data is never ',
-'changed.<br>',
+'changed.<br><br>',
+'<strong>Category names you can use:</strong><br>',
+'NEW, ACCESSIBILITY, AI, BUSINESS, CALENDAR, CHART, CONSTRUCTION, COUNTRY_FLAG, CURRENCY, DIRECTIONAL, EMOJI, FILE_TYPE, FORM_CONTROL, GENDER, HAND, MAPS, MEDICAL, NUMBERS, PAYMENT, SPINNER, TEXT_EDITOR, TRANSPORTATION, VIDEO_PLAYER, WEB_APPLICATION<br><br>',
+'Icon names are the Font APEX class names - open the picker and turn on ',
+'<strong>Show Icon Labels</strong> to read them, or hover any icon for its tooltip.<br>',
 '<br>',
 'This list applies to this item only, <strong>on top of</strong> the application ',
 'wide list under Shared Components, Plug-ins, IconPicker. Both lists always apply; ',
