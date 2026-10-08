@@ -394,12 +394,26 @@
 /* ------------------------------------------------------- item rendering */
 /* the plug-in's own markup on the host page - deliberately narrow selectors */
 
+/* Inline flow, not flex: the Interactive Grid aligns a column (Left / Center / Right, Start /
+   End) by putting text-align on the cell (u-tL, u-tC, u-tR, u-tS, u-tE), and text-align does
+   nothing to the items of a flex container. 3.0.0 used flex, so every column sat on the
+   left whatever its alignment; 2.0 was inline and honoured it. */
 .ig-div-icon-picker {
-    display: flex;
-    align-items: center;
-    gap: .25rem;
+    display: block;
     width: 100%;
     min-width: 0;
+    white-space: nowrap;
+}
+
+/* Vertical centring without flex: a zero-width strut as tall as the wrapper. It matters in
+   the cell editor, where the grid stretches the wrapper to the row height; in a plain cell
+   the wrapper is only as tall as its content and the strut has no effect. */
+.ig-div-icon-picker::before {
+    content: "";
+    display: inline-block;
+    width: 0;
+    height: 100%;
+    vertical-align: middle;
 }
 
 /* Universal Theme gives .t-Button--icon.t-Button--noLabel 7px/11px padding around a
@@ -410,8 +424,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex: 0 0 auto;
-    align-self: center;
+    vertical-align: middle;
     width: 1.75rem;
     min-width: 1.75rem;
     height: 1.75rem;
@@ -436,10 +449,14 @@
     line-height: 1;
 }
 
+/* inline-block so a long name still ends in an ellipsis; the max-width leaves room for the
+   button and the gap in front of it */
 .ig-div-icon-picker > label {
-    flex: 1 1 auto;
-    min-width: 0;
+    display: inline-block;
+    max-width: calc(100% - 2rem);
     margin: 0;
+    margin-inline-start: .25rem;
+    vertical-align: middle;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

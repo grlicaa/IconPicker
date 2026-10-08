@@ -40,6 +40,9 @@ Fixes found by automated testing on APEX 23.2, 24.2, 26.1 and 26.2:
   of a page item, also with *Suppress Change Event* on.
 - **A cleared page item shows its own icon** (Appearance > Icon), not the grid column's
   default icon.
+- **Interactive Grid column alignment works again.** Left, Center and Right (and Start /
+  End) place the icon and its name in the cell as they did in 2.0; 3.0 kept every column on
+  the left.
 
 The 1.5 and 2.0 exports for older APEX releases are not updated and still have the read-only
 grid column submit problem; give such a column an editable Icon Picker with
