@@ -1,5 +1,5 @@
 /*!
- * Icon Picker 3.0 - Oracle APEX item plug-in
+ * Icon Picker 3.0.1 - Oracle APEX item plug-in
  * https://github.com/grlicaa/IconPicker
  *
  * Replaces IPdoc.js and IPgrid.js from 2.0.
@@ -854,10 +854,17 @@
     /**
      * Wires up a page item rendered by the plug-in.
      *
-     * The icon preview is refreshed from the item's own change event rather than by
-     * overriding apex.item.create - that keeps the item a stock APEX text item, so dynamic
-     * actions, validation and session state all behave exactly as they did in 2.0, while
-     * apex.item( name ).setValue( ... ) still updates the preview because it fires change.
+     * The preview follows the value two ways:
+     *   - a jQuery change handler, for typing into the field. It has to be jQuery: APEX
+     *     fires change with $.fn.trigger, which never reaches a native addEventListener
+     *     (3.0 used one, so apex.item().setValue() left the preview stale).
+     *   - a setValue callback, for apex.item( name ).setValue( ... ) and Set Value dynamic
+     *     actions, including "Suppress Change Event", which fire no change at all. Only
+     *     setValue is overridden; everything else stays the stock text item behaviour, and
+     *     APEX still triggers change itself unless told not to.
+     *
+     * An empty value falls back to the item's own icon (Appearance > Icon), the same one
+     * the server renders - never the grid column default.
      */
     ip.attach = function ( itemName, options ) {
         var input  = global.document.getElementById( itemName ),
@@ -867,9 +874,18 @@
             return;
         }
 
-        input.addEventListener( "change", function () {
-            pageItemIcon( itemName, input.value, options.defaultIcon );
+        $( input ).on( "change", function () {
+            pageItemIcon( itemName, input.value, options.itemIcon );
         } );
+
+        if ( global.apex && global.apex.item && global.apex.item.create ) {
+            global.apex.item.create( itemName, {
+                setValue: function ( value ) {
+                    input.value = value === null || value === undefined ? "" : value;
+                    pageItemIcon( itemName, input.value, options.itemIcon );
+                }
+            } );
+        }
 
         if ( !button ) {
             return;                         // read-only or printer friendly
@@ -886,7 +902,7 @@
                     } else {
                         input.value = iconName;
                     }
-                    pageItemIcon( itemName, iconName, options.defaultIcon );
+                    pageItemIcon( itemName, iconName, options.itemIcon );
 
                     var container = global.document.getElementById( itemName + "_CONTAINER" );
 
@@ -925,10 +941,12 @@
                 .attr( "type", "button" )
                 .attr( "class", "t-Button t-Button--noLabel t-Button--icon ig-ip-render ig-button-icon-picker"
                     + ( options.showText ? "" : " ip-icon-only" ) )
+                // on the button, not the icon span inside it (3.0), so a read-only cell
+                // is not a clickable, focusable button
+                .optionalAttr( "disabled", options.readOnly )
                 .markup( "><span" )
                 .attr( "class", " ig-span-icon-picker fa " + iconClass )
                 .attr( "aria-hidden", true )
-                .optionalAttr( "disabled", options.readOnly )
                 .markup( " /></button><input" )
                 .attr( "type", "hidden" )
                 .attr( "class", "ig-input-icon-picker" )

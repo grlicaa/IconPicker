@@ -1,6 +1,6 @@
 {
   "name": "Icon Picker",
-  "version": "3.0",
+  "version": "3.0.1",
   "description": "Oracle APEX item Plug-in for Icon selection (Page item and Interactive Grid), built on Font APEX 2.5.1",
   "keywords": ["icon", "icons", "icon picker", "icon selector", "font apex"],
   "homepage": "https://github.com/grlicaa/IconPicker",

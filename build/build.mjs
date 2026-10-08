@@ -10,6 +10,8 @@
  *      file hex encoded exactly the way APEX's own exporter writes them
  *   4. decode the generated hex back to bytes and assert it matches dist/, so a broken
  *      export can never reach the repository
+ *   5. write the same PL/SQL, version and files into the plug-in embedded in
+ *      docs/demo_app/sample_app_apex_232.sql, with the same round trip check
  *
  * The export header targets APEX 23.2, which is the oldest release this version supports.
  * APEX accepts exports from its own release or older, so one file installs on 23.2 through
@@ -26,6 +28,9 @@ import { PLUGIN, EXPORT_ENV, ATTRIBUTES, FILES } from './plugin-metadata.mjs';
 const ROOT   = join( dirname( fileURLToPath( import.meta.url ) ), '..' );
 const DIST   = join( ROOT, 'dist' );
 const TARGET = join( ROOT, 'plug-in', 'item_type_plugin_si_abakus_iconpicker_apex_232.sql' );
+
+const DEMO_APP_NAME = 'docs/demo_app/sample_app_apex_232.sql';
+const DEMO_APP      = join( ROOT, DEMO_APP_NAME );
 
 const BYTES_PER_LINE = 100;      // 200 hex characters, same as an APEX generated export
 
@@ -298,26 +303,105 @@ function footer() {
  * corruption here would only surface as a broken plug-in inside somebody's application, so
  * the build fails loudly instead.
  */
-function verify( sql, buffers ) {
+function verifyFiles( sql, buffers, label = '' ) {
     const blocks = sql.split( 'wwv_flow_imp.g_varchar2_table := wwv_flow_imp.empty_varchar2_table;' ).slice( 1 );
 
     if ( blocks.length !== FILES.length ) {
-        throw new Error( `expected ${ FILES.length } file blocks, found ${ blocks.length }` );
+        throw new Error( `${ label }expected ${ FILES.length } file blocks, found ${ blocks.length }` );
     }
 
     FILES.forEach( ( file, index ) => {
-        const hex = [ ...blocks[ index ].matchAll( /g_varchar2_table\(\d+\) := '([0-9A-F]*)';/g ) ]
+        const block = blocks[ index ];
+        const hex = [ ...block.matchAll( /g_varchar2_table\(\d+\) := '([0-9A-F]*)';/g ) ]
             .map( match => match[ 1 ] )
             .join( '' );
         const decoded = Buffer.from( hex, 'hex' );
 
+        if ( !block.includes( `,p_file_name=>${ q( file.name ) }` ) ) {
+            throw new Error( `${ label }file block ${ index + 1 } is not ${ file.name }` );
+        }
+
         if ( !decoded.equals( buffers[ index ] ) ) {
-            throw new Error( `round trip failed for ${ file.name }: `
+            throw new Error( `${ label }round trip failed for ${ file.name }: `
                 + `${ decoded.length } bytes decoded, ${ buffers[ index ].length } bytes expected` );
         }
 
-        console.log( `  ${ file.name }: ${ buffers[ index ].length } bytes round tripped` );
+        console.log( `  ${ label }${ file.name }: ${ buffers[ index ].length } bytes round tripped` );
     } );
+}
+
+// ---------------------------------------------------------------------------
+// 5. demo application
+// ---------------------------------------------------------------------------
+
+/**
+ * The demo application embeds its own copy of the plug-in, and that copy is what gets
+ * installed when somebody imports the demo. Re-exporting the app from a newer APEX would
+ * raise its release and stop it importing on 23.2, so instead the build rewrites the parts
+ * of the embedded copy that come from src/ and plsql/ - the PL/SQL code, the version and
+ * the three files - and leaves the app's own IDs, attributes and settings alone.
+ */
+function syncDemoApp( plsqlLines, buffers ) {
+    const original = readFileSync( DEMO_APP, 'utf8' );
+    const eol      = original.includes( '\r\n' ) ? '\r\n' : '\n';
+    const text     = original.replace( /\r\n/g, '\n' );
+
+    const start = text.indexOf( 'prompt --application/shared_components/plugins/item_type/si_abakus_iconpicker\n' );
+    const end   = text.indexOf( '\nprompt --', start + 1 );
+
+    if ( start < 0 || end < 0 ) {
+        throw new Error( `${ DEMO_APP }: Icon Picker plug-in section not found` );
+    }
+
+    let section = text.slice( start, end );
+
+    function replaceOnce( pattern, replacement, what ) {
+        const matches = section.match( new RegExp( pattern.source, pattern.flags + 'g' ) ) || [];
+
+        if ( matches.length !== 1 ) {
+            throw new Error( `demo app: expected one ${ what }, found ${ matches.length }` );
+        }
+        section = section.replace( pattern, () => replacement );
+    }
+
+    replaceOnce(
+        /,p_plsql_code=>wwv_flow_string\.join\(wwv_flow_t_varchar2\(\n[\s\S]*?\n''\)\)\n/,
+        ',p_plsql_code=>' + joinLines( plsqlLines.concat( [ '' ] ) ) + '\n',
+        'p_plsql_code' );
+
+    replaceOnce(
+        /,p_version_identifier=>'[^']*'\n/,
+        `,p_version_identifier=>${ q( PLUGIN.version ) }\n`,
+        'p_version_identifier' );
+
+    FILES.forEach( ( file, index ) => {
+        // the hex block that precedes create_plugin_file(... p_file_name=>'<name>' ...)
+        const pattern = new RegExp(
+            'wwv_flow_imp\\.g_varchar2_table := wwv_flow_imp\\.empty_varchar2_table;\\n'
+            + '(?:wwv_flow_imp\\.g_varchar2_table\\(\\d+\\) := \'[0-9A-F]*\';\\n)*'
+            + '(?=null;\\nend;\\n/\\nbegin\\nwwv_flow_imp_shared\\.create_plugin_file\\(\\n'
+            + '[^\\n]*\\n[^\\n]*\\n,p_file_name=>' + q( file.name ).replace( /[.*+?^${}()|[\]\\/]/g, '\\$&' ) + '\\n)' );
+
+        const assignments = hexLines( buffers[ index ] )
+            .map( ( hex, line ) => `wwv_flow_imp.g_varchar2_table(${ line + 1 }) := '${ hex }';\n` )
+            .join( '' );
+
+        replaceOnce( pattern,
+            'wwv_flow_imp.g_varchar2_table := wwv_flow_imp.empty_varchar2_table;\n' + assignments,
+            `file block for ${ file.name }` );
+    } );
+
+    const updated = ( text.slice( 0, start ) + section + text.slice( end ) ).replace( /\n/g, eol );
+
+    // same round trip as the plug-in export: the files must decode back byte for byte
+    verifyFiles( section, buffers, 'demo app ' );
+
+    if ( updated === original ) {
+        console.log( `  ${ DEMO_APP_NAME } already up to date` );
+    } else {
+        writeFileSync( DEMO_APP, updated );
+        console.log( `  ${ DEMO_APP_NAME } updated` );
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -350,7 +434,10 @@ const sql = [
 writeFileSync( TARGET, sql );
 
 console.log( 'Verifying' );
-verify( sql, buffers );
+verifyFiles( sql, buffers );
+
+console.log( 'Updating the demo application' );
+syncDemoApp( plsqlLines, buffers );
 
 // The README documents the category names a developer can blacklist or translate. It is
 // written by hand, so the build checks it still matches the catalog rather than trusting it.

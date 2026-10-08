@@ -419,6 +419,13 @@
     line-height: 1;
 }
 
+/* a read-only column's cells hold a disabled button; they show a value, not a disabled
+   control, so the theme's faded disabled look does not apply */
+.ig-div-icon-picker .t-Button.ig-ip-render:disabled {
+    opacity: 1;
+    cursor: default;
+}
+
 .ig-div-icon-picker .ig-span-icon-picker.fa {
     display: block;
     width: auto;

@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
--- Icon Picker 3.0 - Oracle APEX item plug-in
+-- Icon Picker 3.0.1 - Oracle APEX item plug-in
 -- https://github.com/grlicaa/IconPicker
 --
 -- This file is the plug-in's "PL/SQL Code" attribute. build/build.mjs embeds it into
@@ -99,6 +99,9 @@ is
     l_component_type      lt_string := p_item.component_type_id;
     l_is_grid             boolean   := p_item.component_type_id = apex_component.c_comp_type_ig_column;
     l_is_editable         boolean   := not p_param.is_readonly and not p_param.is_printer_friendly;
+    -- A grid column is read only when the plug-in says so (IG Read Only) or when APEX does
+    -- (Read Only condition, printer friendly). Both render the same way: the icon, no picker.
+    l_read_only           boolean   := l_ig_read_only = 'Y' or not l_is_editable;
 
     c_name       constant varchar2(30) := apex_plugin.get_input_name_for_item;
 
@@ -123,6 +126,7 @@ begin
         ',"smallLabel":'     || apex_escape.js_literal( l_small_label,        '"' ) ||
         ',"largeLabel":'     || apex_escape.js_literal( l_large_label,        '"' ) ||
         ',"defaultIcon":'    || apex_escape.js_literal( l_ig_default_icon,    '"' ) ||
+        ',"itemIcon":'       || apex_escape.js_literal( p_item.icon_css_classes, '"' ) ||
         ',"blacklist":'      || apex_escape.js_literal( l_blacklist,          '"' ) ||
         ',"showLabels":'     || bool_attr( l_show_icon_labels, 'N' ) ||
         ',"showCategories":' || bool_attr( l_show_categories,  'Y' ) ||
@@ -130,46 +134,39 @@ begin
         ',"width":'          || l_dialog_width ||
         ',"height":'         || l_dialog_height ||
         ',"showText":'       || case when l_ig_only_icon = 'Y' then 'false' else 'true' end ||
-        ',"readOnly":'       || bool_attr( l_ig_read_only, 'N' ) ||
+        ',"readOnly":'       || case when l_read_only then 'true' else 'false' end ||
         '}';
 
     if l_is_grid then
 
-        if not l_is_editable then
+        -- A read-only column is rendered like an editable one, just disabled. 3.0 printed
+        -- apex_plugin_util.print_hidden_if_readonly here instead, which registers the column
+        -- as a protected page item: every page submit then failed with "Page protection
+        -- violation", and without attachGrid the grid showed the icon name as text.
+        --
+        -- Must stay in step with render() in src/js/iconpicker.js, which produces the
+        -- same markup for rows the Interactive Grid draws on the client.
+        sys.htp.prn(
+            apex_string.format(
+                '<div class="ig-div-icon-picker"><button id="%s_lov_btn" type="button" ' ||
+                'class="t-Button t-Button--noLabel t-Button--icon ig-button-icon-picker %s" %s>' ||
+                '<span class="ig-span-icon-picker fa %s" aria-hidden="true"></span></button>' ||
+                '<input %s type="%s" value="%s" %s /></div>'
+                , apex_escape.html_attribute( p_item.name )
+                , case when l_ig_only_icon = 'Y' then 'ip-icon-only' end
+                , case when l_read_only then 'disabled' end
+                , apex_escape.html_attribute( nvl( l_value, l_ig_default_icon ) )
+                , apex_plugin_util.get_element_attributes( p_item, c_name, 'apex-item-text igiconpicker apex-item-plugin' )
+                , case when l_ig_only_icon = 'Y' then 'hidden' else 'text' end
+                , apex_escape.html_attribute( l_value )
+                , case when l_read_only then 'disabled' end
+                , p_max_length => 32767 ) );
 
-            apex_plugin_util.print_hidden_if_readonly (
-                p_item_name           => p_item.name,
-                p_value               => p_param.value,
-                p_is_readonly         => p_param.is_readonly,
-                p_is_printer_friendly => p_param.is_printer_friendly );
-
-        else
-
-            -- Must stay in step with render() in src/js/iconpicker.js, which produces the
-            -- same markup for rows the Interactive Grid draws on the client.
-            sys.htp.prn(
-                apex_string.format(
-                    '<div class="ig-div-icon-picker"><button id="%s_lov_btn" type="button" ' ||
-                    'class="t-Button t-Button--noLabel t-Button--icon ig-button-icon-picker %s" %s>' ||
-                    '<span class="ig-span-icon-picker fa %s" aria-hidden="true"></span></button>' ||
-                    '<input %s type="%s" value="%s" %s /></div>'
-                    , apex_escape.html_attribute( p_item.name )
-                    , case when l_ig_only_icon = 'Y' then 'ip-icon-only' end
-                    , case when l_ig_read_only = 'Y' then 'disabled' end
-                    , apex_escape.html_attribute( nvl( l_value, l_ig_default_icon ) )
-                    , apex_plugin_util.get_element_attributes( p_item, c_name, 'apex-item-text igiconpicker apex-item-plugin' )
-                    , case when l_ig_only_icon = 'Y' then 'hidden' else 'text' end
-                    , apex_escape.html_attribute( l_value )
-                    , case when l_ig_read_only = 'Y' then 'disabled' end
-                    , p_max_length => 32767 ) );
-
-            l_onload_code := l_onload_code || apex_string.format(
-                'abakusIconPicker.attachGrid(%s,%s);',
-                apex_escape.js_literal( p_item.name, '"' ),
-                l_options,
-                p_max_length => 32767 );
-
-        end if;
+        l_onload_code := l_onload_code || apex_string.format(
+            'abakusIconPicker.attachGrid(%s,%s);',
+            apex_escape.js_literal( p_item.name, '"' ),
+            l_options,
+            p_max_length => 32767 );
 
         p_result.is_navigable := l_is_editable;
 

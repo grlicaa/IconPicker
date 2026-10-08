@@ -28,7 +28,24 @@ Running APEX 22.1 to 23.1? Import `item_type_plugin_si_abakus_iconpicker_apex_22
 
 ## Change log
 
-#### V 3.0. - For APEX 23.2 and later
+#### V 3.0.1 - For APEX 23.2 and later
+
+Fixes found by automated testing on APEX 23.2, 24.2, 26.1 and 26.2:
+
+- **A read-only Interactive Grid column no longer breaks page submit.** For a column APEX
+  makes read only (Read Only: Always, or a read-only condition) 3.0 registered a protected
+  hidden item, so *every* submit of that page failed with "Page protection violation".
+- **That column now shows icons**, not the icon class name as text.
+- **`apex.item( name ).setValue()` and Set Value dynamic actions update the icon preview**
+  of a page item, also with *Suppress Change Event* on.
+- **A cleared page item shows its own icon** (Appearance > Icon), not the grid column's
+  default icon.
+
+The 1.5 and 2.0 exports for older APEX releases are not updated and still have the read-only
+grid column submit problem; give such a column an editable Icon Picker with
+**IG Read Only = Yes** instead of making it read only in APEX.
+
+#### V 3.0 - For APEX 23.2 and later
 
 - **Font APEX 2.5.1**, the icon set that ships with APEX 26.1: 1,541 icons across 24
   categories, up from 1,262. New `AI`, `BUSINESS`, `CONSTRUCTION` and `COUNTRY_FLAG`
@@ -273,11 +290,12 @@ Measured against real instances:
 | 23.2 | 2.2 | 1,594 → 1,253 | AI, Business, Construction, Country flag | 91 |
 | 24.1 | 2.3 | 1,594 → 1,327 | Construction, Country flag | 86 |
 | 24.2 | 2.4 | 1,594 → 1,581 | Construction | 87 |
-| 26.1 | 2.5.1 | unchanged | none | - |
+| 26.1 | 2.5.1 | unchanged | none | 87 |
 
-`OTHER` holds icons your instance renders that 2.5.1 has since dropped - `fa-automobile`,
-`fa-bank`, `fa-bar-chart-o` and friends - so values already stored against those names stay
-selectable. The reconcile happens before the first paint, so there is no flash of icons that
+`OTHER` holds icons your instance renders that the 2.5.1 catalog does not list - legacy
+aliases such as `fa-automobile`, `fa-bank`, `fa-bar-chart-o` and friends, which the stylesheet
+still declares - so values already stored against those names stay selectable. Expect it on
+every release, 26.1 included; the exact count depends on the APEX release and patch level. The reconcile happens before the first paint, so there is no flash of icons that
 then vanish.
 
 Both ways Font APEX declares an icon are recognised: glyphs
