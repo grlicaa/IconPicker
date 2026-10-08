@@ -3,6 +3,16 @@
 An Oracle APEX item plug-in for picking a Font APEX icon, on a page item or an Interactive
 Grid column.
 
+## What's new
+
+- **3.0.1** - bug fixes: a read-only Interactive Grid column no longer breaks page submit and
+  shows its icons; `setValue` and Set Value dynamic actions update the page item preview;
+  grid column alignment (left / center / right) works again.
+- **3.0** - Font APEX 2.5.1 (1,541 icons), category tabs, icon blacklist, translatable dialog,
+  no jQuery UI, adapts to the icons your APEX release actually has.
+
+Details in the [Change log](#change-log).
+
 ## Demo
 A demo application is available on oracleapex.com<br/>
 https://oracleapex.com/ords/f?p=94650<br/>
@@ -30,7 +40,7 @@ Running APEX 22.1 to 23.1? Import `item_type_plugin_si_abakus_iconpicker_apex_22
 
 #### V 3.0.1 - For APEX 23.2 and later
 
-Fixes found by automated testing on APEX 23.2, 24.2, 26.1 and 26.2:
+Fixes found by automated testing, verified on APEX 24.2, 26.1 and 26.2:
 
 - **A read-only Interactive Grid column no longer breaks page submit.** For a column APEX
   makes read only (Read Only: Always, or a read-only condition) 3.0 registered a protected
