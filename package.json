@@ -1,6 +1,6 @@
 {
   "name": "apex-icon-picker",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Oracle APEX item plug-in for picking a Font APEX icon, on a page item or an Interactive Grid column",
   "license": "MIT",
   "private": true,

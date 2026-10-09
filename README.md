@@ -5,6 +5,9 @@ Grid column.
 
 ## What's new
 
+- **3.0.2** - saving an Interactive Grid no longer fails with "Session state protection
+  violation" after a row with a read-only Icon Picker column was edited, and IG Read Only
+  columns no longer lose their icon on save.
 - **3.0.1** - bug fixes: a read-only Interactive Grid column no longer breaks page submit and
   shows its icons; `setValue` and Set Value dynamic actions update the page item preview;
   grid column alignment (left / center / right) works again.
@@ -37,6 +40,16 @@ Running APEX 22.1 to 23.1? Import `item_type_plugin_si_abakus_iconpicker_apex_22
 (version 2.0) instead. For 18.1 to 21.2, use `..._apex_181.sql` (version 1.5).
 
 ## Change log
+
+#### V 3.0.2 - For APEX 23.2 and later
+
+- **Saving the Interactive Grid works after you enter a read-only Icon Picker cell.** 3.0.1
+  rendered a read-only column's item disabled. When the grid activated the row (for example
+  a double click on the read-only cell), it marked the field disabled and sent it to the
+  server empty. A column APEX makes read only then failed the save with "Session state
+  protection violation", and an **IG Read Only** column was saved blank. The item is now
+  read only instead of disabled, and the button stays disabled, so the picker still doesn't
+  open. Verified on APEX 26.2.
 
 #### V 3.0.1 - For APEX 23.2 and later
 

@@ -28,7 +28,7 @@ end;
 prompt APPLICATION 216 - Icon Picker [Plug-in]
 --
 -- Application Export:
---   Name:            Icon Picker [Plug-in] 3.0.1
+--   Name:            Icon Picker [Plug-in] 3.0.2
 --   Manifest
 --     PLUGIN: 208808430900605280
 --   Manifest End
@@ -56,7 +56,7 @@ wwv_flow_imp_shared.create_plugin(
 ,p_css_file_urls=>'#PLUGIN_FILES#css/iconpicker.min.css'
 ,p_plsql_code=>wwv_flow_string.join(wwv_flow_t_varchar2(
 '--------------------------------------------------------------------------------',
-'-- Icon Picker 3.0.1 - Oracle APEX item plug-in',
+'-- Icon Picker 3.0.2 - Oracle APEX item plug-in',
 '-- https://github.com/grlicaa/IconPicker',
 '--',
 '-- This file is the plug-in''s "PL/SQL Code" attribute. build/build.mjs embeds it into',
@@ -201,6 +201,13 @@ wwv_flow_imp_shared.create_plugin(
 '        -- as a protected page item: every page submit then failed with "Page protection',
 '        -- violation", and without attachGrid the grid showed the icon name as text.',
 '        --',
+'        -- Only the button is disabled. The input is the column item the grid reads, and',
+'        -- 3.0.1 disabled it too: apex.item().isDisabled() then returned true, the grid',
+'        -- marked the field disabled when a row was activated (double click), and the',
+'        -- model sent a disabled field to the server empty. On an APEX read-only column that',
+'        -- failed the save with "Session state protection violation"; on an IG Read Only',
+'        -- column it silently saved the icon as blank. readonly blocks typing without that.',
+'        --',
 '        -- Must stay in step with render() in src/js/iconpicker.js, which produces the',
 '        -- same markup for rows the Interactive Grid draws on the client.',
 '        sys.htp.prn(',
@@ -216,7 +223,7 @@ wwv_flow_imp_shared.create_plugin(
 '                , apex_plugin_util.get_element_attributes( p_item, c_name, ''apex-item-text igiconpicker apex-item-plugin'' )',
 '                , case when l_ig_only_icon = ''Y'' then ''hidden'' else ''text'' end',
 '                , apex_escape.html_attribute( l_value )',
-'                , case when l_read_only then ''disabled'' end',
+'                , case when l_read_only then ''readonly'' end',
 '                , p_max_length => 32767 ) );',
 '',
 '        l_onload_code := l_onload_code || apex_string.format(',
@@ -299,7 +306,7 @@ wwv_flow_imp_shared.create_plugin(
 ,p_standard_attributes=>'VISIBLE:FORM_ELEMENT:SESSION_STATE:READONLY:ESCAPE_OUTPUT:SOURCE:ELEMENT:WIDTH:ELEMENT_OPTION:PLACEHOLDER:ICON'
 ,p_substitute_attributes=>true
 ,p_subscribe_plugin_settings=>true
-,p_version_identifier=>'3.0.1'
+,p_version_identifier=>'3.0.2'
 ,p_about_url=>'https://github.com/grlicaa/IconPicker'
 ,p_files_version=>38
 );
@@ -1372,7 +1379,7 @@ end;
 /
 begin
 wwv_flow_imp.g_varchar2_table := wwv_flow_imp.empty_varchar2_table;
-wwv_flow_imp.g_varchar2_table(1) := '2F2A210A202A2049636F6E205069636B657220332E302E31202D204F7261636C652041504558206974656D20706C75672D696E0A202A2068747470733A2F2F6769746875622E636F6D2F67726C696361612F49636F6E5069636B65720A202A0A202A2052';
+wwv_flow_imp.g_varchar2_table(1) := '2F2A210A202A2049636F6E205069636B657220332E302E32202D204F7261636C652041504558206974656D20706C75672D696E0A202A2068747470733A2F2F6769746875622E636F6D2F67726C696361612F49636F6E5069636B65720A202A0A202A2052';
 wwv_flow_imp.g_varchar2_table(2) := '65706C61636573204950646F632E6A7320616E64204950677269642E6A732066726F6D20322E302E0A202A0A202A204E6F7461626C6520646966666572656E6365732066726F6D20322E303A0A202A2020202D206F6E65206E6174697665203C6469616C';
 wwv_flow_imp.g_varchar2_table(3) := '6F673E2C2063726561746564206F6E63652070657220706167652C20696E7374656164206F662061206A5175657279205549206469616C6F6720706572206974656D0A202A2020202020286A517565727920554920697320646570726563617465642069';
 wwv_flow_imp.g_varchar2_table(4) := '6E204150455820616E6420242E666E2E69636F6E4C697374206E6F206C6F6E6765722065786973747320617420616C6C290A202A2020202D206772696420656E747269657320617265207265616C203C627574746F6E3E20656C656D656E747320626F75';

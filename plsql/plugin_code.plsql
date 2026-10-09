@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
--- Icon Picker 3.0.1 - Oracle APEX item plug-in
+-- Icon Picker 3.0.2 - Oracle APEX item plug-in
 -- https://github.com/grlicaa/IconPicker
 --
 -- This file is the plug-in's "PL/SQL Code" attribute. build/build.mjs embeds it into
@@ -144,6 +144,13 @@ begin
         -- as a protected page item: every page submit then failed with "Page protection
         -- violation", and without attachGrid the grid showed the icon name as text.
         --
+        -- Only the button is disabled. The input is the column item the grid reads, and
+        -- 3.0.1 disabled it too: apex.item().isDisabled() then returned true, the grid
+        -- marked the field disabled when a row was activated (double click), and the
+        -- model sent a disabled field to the server empty. On an APEX read-only column that
+        -- failed the save with "Session state protection violation"; on an IG Read Only
+        -- column it silently saved the icon as blank. readonly blocks typing without that.
+        --
         -- Must stay in step with render() in src/js/iconpicker.js, which produces the
         -- same markup for rows the Interactive Grid draws on the client.
         sys.htp.prn(
@@ -159,7 +166,7 @@ begin
                 , apex_plugin_util.get_element_attributes( p_item, c_name, 'apex-item-text igiconpicker apex-item-plugin' )
                 , case when l_ig_only_icon = 'Y' then 'hidden' else 'text' end
                 , apex_escape.html_attribute( l_value )
-                , case when l_read_only then 'disabled' end
+                , case when l_read_only then 'readonly' end
                 , p_max_length => 32767 ) );
 
         l_onload_code := l_onload_code || apex_string.format(

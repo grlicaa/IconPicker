@@ -1,5 +1,5 @@
 /*!
- * Icon Picker 3.0.1 - Oracle APEX item plug-in
+ * Icon Picker 3.0.2 - Oracle APEX item plug-in
  * https://github.com/grlicaa/IconPicker
  *
  * Replaces IPdoc.js and IPgrid.js from 2.0.

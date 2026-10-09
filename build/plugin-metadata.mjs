@@ -10,7 +10,7 @@ export const PLUGIN = {
     id:              '208808430900605280',
     internalName:    'SI.ABAKUS.ICONPICKER',
     displayName:     'IconPicker',
-    version:         '3.0.1',
+    version:         '3.0.2',
     aboutUrl:        'https://github.com/grlicaa/IconPicker',
     filesVersion:    38,
     componentTypes:  'APEX_APPLICATION_PAGE_ITEMS:APEX_APPL_PAGE_IG_COLUMNS',
